@@ -18,8 +18,7 @@
 
 # source common configuration (gets rsync options)
 . ${HOME}/etc/shell.conf
-
-lg-ctl-master
+. ${SHINCLUDE}/lg-functions
 
 if [[ ${#@} -lt 2 ]]; then
     echo "This sync is a bit dangerous! Be sure to at least provide SRC and DEST:
@@ -27,6 +26,9 @@ if [[ ${#@} -lt 2 ]]; then
 "
     exit 1
 fi
+
+# creates control master sockets
+lg-ctl-master
 
 if [[ "$1" == "--really-sync" ]]; then
     shift

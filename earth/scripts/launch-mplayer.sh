@@ -17,15 +17,16 @@
 . ${SHINCLUDE}/lg-functions
 
 if [[ "${FRAME_NO}" = "0" ]]; then
+    echo "[$( date )] launch-mplayer" >${HOME}/log/launch-mplayer.log
     lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
-    pkill -f viewsyncrelay.pl 
+    pkill -f viewsyncrelay.pl
+    lg-run-bg ${HOME}/bin/lg-pls-gen /media
     pkill -u $(id -u) socat
+    VSYNCBYTES=12
+    MULTIPLIER=0
+    socat -b $VSYNCBYTES -u udp4-listen:${MPLAYER_PORT},reuseaddr,bind=127.255.255.255 udp4-datagram:10.42.${LG_OCTET}.255:$((${MPLAYER_PORT}+${MULTIPLIER})),broadcast &
+    MULTIPLIER=2
+    socat -b $VSYNCBYTES -u udp4-listen:${MPLAYER_PORT},reuseaddr,bind=127.255.255.255 udp4-datagram:10.42.${LG_OCTET}.255:$((${MPLAYER_PORT}+${MULTIPLIER})),broadcast &
     sleep 1
-    m4 \
-        -D__LG_OCTET__=${LG_OCTET} \
-        -D__EARTH_PORT__=${EARTH_PORT} \
-        -D__INPUT_PORT__=$((${EARTH_PORT}-1)) \
-        ${SHCONFDIR}/actions-template.m4 >${SHCONFDIR}/actions.yml
-    [[ "${VSYNC_RELAY}" == "true" ]] && viewsyncrelay.pl ${SHCONFDIR}/actions.yml &
-    lg-run-bg ${SCRIPDIR}/run-earth-bin.sh
+    lg-run-bg ${HOME}/bin/launchmplayer 8 ${XDG_VIDEOS_DIR}/default >>${HOME}/log/launch-mplayer.log 2>&1
 fi

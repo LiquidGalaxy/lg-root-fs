@@ -1,0 +1,62 @@
+# - sourced - not executed
+# Copyright 2012 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+VERSION="1.0"
+
+## logging function for various in-script messages
+# basically a wrapper around "logger", but also checks LG_DEBUG variable
+# and keeps "err" messages quiet if not in DEBUG mode
+#  simple usage: lg-log "your message here"
+#  more  useage: lg-log -f local2 -l err -m "your message here"
+function lg-log() {
+    # options from persona
+    local lg_debug="${LG_DEBUG:-false}"
+    local log_facil="${LG_LOG_FACILITY:-local3}"
+    local caller_name="`basename -- $0`"
+    # options from cmd-line
+    local OPTIND
+    while getopts :f:l:m: opt; do
+        case $opt in
+            f)
+              local cmd_message_facil="${OPTARG}"
+              ;;
+            l)
+              local cmd_message_level="${OPTARG}"
+              ;;
+            m)
+              local message="${message} ${OPTARG}"
+              ;;
+            \?)
+              local message="${message} ${OPTARG}"
+              ;;
+         esac
+    done
+    local message_facil="${cmd_message_facil:-${log_facil}}"
+    local message_level="${cmd_message_level:-info}"
+    # any remaining options are just added to the log message
+    shift $((OPTIND-1))
+    local message="${message} $@"
+
+    if [[ "${message_level}" == "err" ]]; then
+        # only log error messages if LG_DEBUG is "true"
+        if [[ "${lg_debug}" == "true" ]]; then
+            logger -p ${message_facil}.${message_level} -- "${caller_name}: ${message%%\ }"
+        fi
+    else
+        logger -p ${message_facil}.${message_level} -- "${caller_name}: ${message%%\ }"
+    fi
+}
+
+# vim:set ai et sts=4 ts=4 sw=4 expandtab filetype=sh:

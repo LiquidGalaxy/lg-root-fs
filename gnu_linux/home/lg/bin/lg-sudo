@@ -14,6 +14,7 @@
 # limitations under the License.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 while [ $# -gt 0 ]; do
   case $1 in
@@ -29,6 +30,7 @@ while [ $# -gt 0 ]; do
 done
 [ -z "${LG_FRAMES}" ] && echo "LG_FRAMES is empty" && exit 1
 
+# creates control master sockets
 lg-ctl-master -u root
 
 for lg in $LG_FRAMES ; do

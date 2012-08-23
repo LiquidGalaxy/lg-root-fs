@@ -18,43 +18,77 @@ if [[ $UID -ne 0 ]] ; then
     exit 1
 fi
 
-SCREEN=$1
-TUPLE=${2:-42}
+# hopefully we were passed some command-line params
+while [[ -n "$1" ]]; do
+    case "$1" in
+        -i)
+            shift
+            CMD_IFACE=$1
+        ;;
+        -p)
+            shift
+            CMD_PERSONA=$1
+        ;;
+        -o)
+            shift
+            CMD_OCTET=$1
+        ;;
+    esac
+    shift
+done
 
-if [[ ( $SCREEN -lt 1 ) || ( $SCREEN -gt 8 ) ]] ; then
-    echo invalid screen number $SCREEN
+PERSONA=${CMD_PERSONA}
+OCTET=${CMD_OCTET:-42}
+IFACE=${CMD_IFACE:-eth0}
+
+if [[ ( $PERSONA -lt 1 ) || ( $PERSONA -gt 8 ) ]] ; then
+    echo invalid screen number $PERSONA
     echo please choose a number 1..8
     exit 2
 fi
-# with this multiple galaxies can exist on shared copper
-if [[ -z $TUPLE ]]; then
-    echo no third tuple specified,
-    echo using default 42... \"10.42.42.0/24\"
-fi
 
-echo lg$SCREEN > /etc/hostname
+echo lg${PERSONA} > /etc/hostname
 
-cat >/etc/network/if-up.d/${TUPLE}-lg_alias <<EOF
+rm -f /etc/network/if-up.d/*-lg_alias
+
+cat >/etc/network/if-up.d/${OCTET}-lg_alias <<EOF
 #!/bin/sh
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # This file created automatically by $0
 # to define an alias where lg systems can communicate
-ifconfig eth0:0 10.42.${TUPLE}.${SCREEN} netmask 255.255.255.0
+ifconfig ${IFACE}:${OCTET} 10.42.${OCTET}.${PERSONA} netmask 255.255.255.0
 # end of file
 EOF
 
-chmod 0755 /etc/network/if-up.d/${TUPLE}-lg_alias
+chmod 0755 /etc/network/if-up.d/${OCTET}-lg_alias
 
-FRAME=`expr $1 - 1`
-
-echo $SCREEN > /lg/screen
+# we start counting FRAMES at "0"
+FRAME=`expr $PERSONA - 1`
 echo $FRAME > /lg/frame
+# we start counting screens per-frame at 1
+#echo $DHCP_LG_SCREENS > /lg/screen
 
-echo "You may want to reboot now.
+if [ ${OCTET} -ne 42 ]; then
+    sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/hosts
+    sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/hosts.squid
+    sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/iptables.conf
+    sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/ssh/ssh_known_hosts
+fi
 
-Adjust the following files (lets use sed):
+service hostname start
+/etc/network/if-pre-up.d/iptables
+/etc/network/if-up.d/${OCTET}-lg_alias
+service rsyslog restart &
+
+echo "You should have a persona configured now.
+
+Adjusted the following files (using sed):
   /etc/hosts
   /etc/hosts.squid
   /etc/iptables.conf
   /etc/ssh/ssh_known_hosts
  if you selected a special third octet."
+
+## we need to think about signaling the whole setup when the persona changes
+#service lxdm restart
+initctl emit --no-wait persona-ok

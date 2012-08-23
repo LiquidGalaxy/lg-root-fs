@@ -17,6 +17,7 @@
 # Works with legacy (lxdm) or current (lightdm) display manager.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 usage="Usage: ${0##*/} -h[elp] [-f frame]"
 

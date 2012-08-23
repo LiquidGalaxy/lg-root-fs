@@ -1,0 +1,11 @@
+#!/bin/bash
+
+LOGFILE=${HOME}/log/external-browser.log
+RESULTS=${HOME}/log/external-browser.get
+
+echo "$( date )"    >>${LOGFILE}
+echo "cmdline: $@"  >>${LOGFILE}
+wget -a ${LOGFILE} -O ${RESULTS} -nv "$@"
+echo fin            >>${LOGFILE}
+
+exit 0

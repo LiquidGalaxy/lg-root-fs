@@ -14,24 +14,30 @@
 # limitations under the License.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
-logger -p local3.info -i "$0: running at $(date +%s)"
+lg-log "running at $(date +%s)"
+# know thyself
+ME="$( basename $0 )"
+ME_USER="$( id -un )"
+ME_USER_NUM="$( id -u )"
 
 # kill any other copies
-ME="`basename $0`"
-MEPIDS="$( pidof -x -o '%PPID' $ME )"
-for pid in ${MEPIDS}; do
-    pkill -u $(id -u) $pid
+ME_PIDS="$( pgrep -u ${ME_USER_NUM} run-earth-bin )"
+for pid in ${ME_PIDS}; do
+    # do not kill thyself or thy children
+    if [ $pid -ne $$ ] && [ $( ps -o ppid= $pid ) -ne $$ ]; then kill -9 $pid; fi
 done
 
-pkill -u $(id -u) googleearth-bin
+pkill -u ${ME_USER_NUM} googleearth-bin
 sleep 2
 
-if [[ "$( id -un )" == "lg" ]]; then
+# execute thyself as each Screen user
+if [[ "${ME_USER}" == "lg" ]]; then
     for screen in /home/lgS*; do
         if [[ -d ${screen} ]]; then
             screennum=${screen##/home/lgS}
-            logger -p local3.info -i "$0: launching $ME for my screen \"${screennum}\""
+            lg-log "launching \"$ME\" for my screen \"${screennum}\""
             sudo -u lgS${screennum} -H DISPLAY=:0.${screennum} ${SCRIPDIR}/${ME} ${@} &
             unset screennum
         fi
@@ -39,11 +45,12 @@ if [[ "$( id -un )" == "lg" ]]; then
 fi
 
 [[ -n "${DISPLAY}" ]] || export DISPLAY=:0.0
-[ ${DISPLAY##*\.} -ne 0 ] && export SCREEN_NO=${DISPLAY##*\.}
-export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating screen
+SANITIZE_D=${DISPLAY//:/}
+[ -n "${SANITIZE_D##*\.}" -a ${SANITIZE_D##*\.} -ne 0 ] && export SCREEN_NO=${SANITIZE_D##*\.}
+export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating scree
 
 cd ${SCRIPDIR} || exit 1
-logger -p local3.info -i "$0: running write drivers. S:\"${SCREEN_NO}\"."
+lg-log "running write-drivers - S:\"${SCREEN_NO}\"."
 ./write-drivers-ini.sh
 
 if [ $FRAME_NO -eq 0 ] ; then
@@ -55,19 +62,23 @@ fi
 MYCFGDIR="${CONFGDIR}/${DIR}"
 # build the configuration file
 m4 -I${MYCFGDIR} ${MYCFGDIR}/GECommonSettings.conf.m4 > ${MYCFGDIR}/$( basename `readlink ${MYCFGDIR}/GECommonSettings.conf.m4` .m4 )
+# prep for copy if needed
+mkdir -p -m 775 ${HOME}/.config/Google
+mkdir -p -m 700 ${HOME}/.googleearth
 # copying files AND potentially symlinks here
-mkdir -m 775 ${HOME}/.config/Google
-mkdir -m 700 ${HOME}/.googleearth
 cp -a ${MYCFGDIR}/*        ${HOME}/.config/Google/
 cp -a ${LGKMLDIR}/${DIR}/* ${HOME}/.googleearth/
 # expand the ##HOMEDIR## var in configs
 sed -i -e "s:##HOMEDIR##:${HOME}:g" ${HOME}/.config/Google/*.conf
-# expand LG_PHPIFACE (may contain ":" and "/") in kml files
-sed -i -e "s@##LG_PHPIFACE##@${LG_PHPIFACE}@g" ${HOME}/.googleearth/*.kml
+# expand vars (may contain ":" and "/") in kml files
+sed -i \
+  -e "s@##LG_PHPIFACE##@${LG_PHPIFACE}@g" \
+  -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${SCREEN_NO:-0}]}@g" \
+  -e "s@##CHECK_REF##@$(cat /etc/hostname)-${SCREEN_NO:-0}@g" ${HOME}/.googleearth/*.kml
 
 while true ; do
     if [[ "$DIR" == "master" ]]; then
-        lg-sudo killall googleearth-bin
+        lg-sudo pkill googleearth-bin
     fi
     [ -w $SPACENAVDEV ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 1
 
@@ -81,13 +92,13 @@ while true ; do
         DISPLAY=:0 xdotool mousemove -screen 1 1910 1190
     else
         # lock the keyboard and mouse
-        DISPLAY=:0 xtrlock & DISPLAY=:0 xdotool mousemove -screen 0 1190 1910
+        #DISPLAY=:0 xtrlock & DISPLAY=:0 xdotool mousemove -screen 0 1190 1910
+        DISPLAY=:0 xdotool mousemove -screen 0 1190 1910
     fi
-    logger -p local3.info -i "$0: running earth"
-    ./googleearth -style cleanlooks --fullscreen -font '-adobe-helvetica-bold-r-normal-*-3-*-*-*-p-*-iso8859-1'
-    # Normally use TINY font size to make the menu bar small and unobtrusive, but error windows become unreadable.
-    # use the below execution for large font. (qt4 is supposed to ignore '-font' if built with freetype support).
-    #./googleearth -style cleanlooks --fullscreen -font '-adobe-helvetica-bold-r-normal-*-16-*-*-*-p-*-iso8859-1'
+    lg-log "running earth"
+    #./googleearth -style cleanlooks --fullscreen -font "-adobe-helvetica-bold-r-normal-*-${LG_FONT_SIZE}-*-*-*-p-*-iso8859-1"
+    LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ &
+    lg-proc-watch -p ${ME_USER} -b googleearth-bin -n "Google Earth" -c ge-lgS0 -k 20
 
     [ -w $SPACENAVDEV ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
     sleep 3

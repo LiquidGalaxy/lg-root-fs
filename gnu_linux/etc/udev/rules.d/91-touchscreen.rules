@@ -1,3 +1,5 @@
-# creates symlinks for the Acer T230H
-SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", SYMLINK+="input/quanta_touch"
+# creates symlinks for some Quanta Touch devices
+# need group read permissions to device for screensaver
+
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", MODE="0640", GROUP="plugdev", SYMLINK+="input/quanta_touch"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", SYMLINK+="usb/quanta_touch"

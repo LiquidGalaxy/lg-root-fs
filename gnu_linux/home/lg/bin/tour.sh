@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-list=${1:-/var/www/queries.txt}
-out=/tmp/query.txt
+. ${HOME}/etc/shell.conf
+
+list=${TOUCHSCRQRF:-/var/www/queries.txt}
+out=${EARTH_QUERY}
 
 # if you'd like to tour the moon or mars, replace "earth" in this awk cmd
 query=$( awk -F'@' '/^earth/ {print $NF}' $list | shuf -n 1 )

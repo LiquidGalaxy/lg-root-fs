@@ -16,32 +16,20 @@
 # Source the common shell configuration
 # initializes some variables, like FRAME_NO
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 # FRAME_NO is set by personality
-if [[ $FRAME_NO -gt 4 ]] ; then
-    FRAME_NO="$(echo $FRAME_NO - 8 | bc)"
+if [[ ${FRAME_NO} -gt $(( ${LG_FRAMES_MAX}/2 )) ]] ; then
+    FRAME_NO="$(( ${FRAME_NO} - ${LG_FRAMES_MAX} ))"
 fi
 
 MASTER="false"
 SLAVE="true"
-if [[ $FRAME_NO == 0 ]] ; then
+if [ $FRAME_NO -eq 0 ] ; then
     MASTER="true"
     SLAVE="false"
 fi
 
-FOV="36.5"
-YAW_AMOUNT="-42"
-
-YAW="$(echo $FRAME_NO '*' $YAW_AMOUNT | bc)"
-# adjust YAW for secondary (further away from LG1) screens
-if [[ -n "${SCREEN_NO}" ]]; then
-    logger -p local3.info "$0: have screen number \"${SCREEN_NO}\", adjusting YAW"
-    if [[ $FRAME_NO -gt 0 ]]; then
-        let "YAW += $( echo $YAW_AMOUNT '*' $SCREEN_NO | bc -l )"
-    elif [[ $FRAME_NO -lt 0 ]]; then
-        let "YAW -= $( echo $YAW_AMOUNT '*' $SCREEN_NO | bc -l )"
-    fi  
-fi
 MYIPALIAS="$( awk '/^ifconfig/ {print $3}' /etc/network/if-up.d/*-lg_alias )"
 VSYNCCHOP="${MYIPALIAS%.*}"
 VSYNCHOST="10.42.${VSYNCCHOP##*.}.255"
@@ -53,6 +41,11 @@ if [[ "$VSYNC_RELAY" == "true" ]] && [[ "$MASTER" == "true" ]]; then
     VSYNCPORT=$((${VSYNCPORT}-1))
 fi
 
+FOV=${LG_HORIZFOV[${SCREEN_NO:-0}]}
+YAW=${LG_YAWOFFSET[${SCREEN_NO:-0}]}
+PITCH=${LG_PITCHOFFSET[${SCREEN_NO:-0}]}
+ROLL=${LG_ROLLOFFSET[${SCREEN_NO:-0}]}
+
 cd ${EARTHDIR} || exit 1
 
 echo "MASTER: $MASTER"
@@ -60,20 +53,24 @@ echo "SLAVE: $SLAVE"
 echo "VSYNCHOST: $VSYNCHOST"
 echo "VSYNCPORT: $VSYNCPORT"
 echo "YAW: $YAW"
+echo "PITCH: $PITCH"
+echo "ROLL: $ROLL"
 echo "FOV: $FOV"
 echo "NAV: $SPACENAVDEV"
 echo "QUERY: $EARTH_QUERY"
 
-chmod 644 builds/latest/drivers.ini
+## THIS MUST BE HANDLED BEFORE NOW
+#chmod 644 builds/latest/drivers.ini
 
-# remember the navigator device AND query file path will have "/" in them
+# remember the navigator device AND query file will have "/"
 cat ${EARTHDIR}/config/drivers_template.ini |\
   sed -e "s/##MASTER##/$MASTER/" \
   -e "s/##SLAVE##/$SLAVE/" \
   -e "s/##VSYNCHOST##/$VSYNCHOST/" \
   -e "s/##VSYNCPORT##/$VSYNCPORT/" \
   -e "s/##YAW##/$YAW/" \
+  -e "s/##PITCH##/$PITCH/" \
+  -e "s/##ROLL##/$ROLL/" \
   -e "s/##FOV##/$FOV/" \
   -e "s:##EARTH_QUERY##:$EARTH_QUERY:" \
-  -e "s:##NAV##:$SPACENAVDEV:" > builds/latest/drivers.ini
-
+  -e "s:##NAV##:$SPACENAVDEV:" > ${BUILDDIR}/${EARTH_BUILD}/drivers.ini

@@ -14,6 +14,8 @@
 # limitations under the License.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
+
 tempdir=${HOME}/tmp
 resize=600
 

@@ -10,17 +10,43 @@
 
 #[[ ${#@} -lt 2 ]] && exit 3
 VIEWFRAMES=${1:-3}
-VIDFILE=${2:-${XDG_VIDEOS_DIR}/default.mp4}
-DEGROTATE=36
-DEGVIEWABLE=29
+VIDFILE=${2:-${XDG_VIDEOS_DIR}/default}
+VIDPLS="${XDG_PLS_DIR}/default.pls"
 DEGLOSSGAP=$(( ${DEGROTATE}-${DEGVIEWABLE} ))
 MPLAYER_VFOPT="-vf screenshot"
-
+ME=`basename $0`
 BCSCALE=3
+
+MASTER=0
+[[ $FRAME_NO -eq 0 && "$( id -un )" == "lg" ]] && export MASTER=1
 
 # try a last-ditch DISPLAY
 if [[ -z "$DISPLAY" ]]; then export DISPLAY=:0; fi
+# execute for other users
+if [[ "$( id -un )" == "lg" ]]; then
+    for screen in /home/lgS*; do
+        if [[ -d ${screen} ]]; then
+            screennum=${screen##/home/lgS}
+            #logger -p local3.info -i "$0: launching $ME for my screen \"${screennum}\""
+            echo "$0: launching $ME for my screen \"${screennum}\""
+            sudo -u lgS${screennum} -H DISPLAY=:0.${screennum} ${HOME}/bin/${ME} $@ &
+            unset screennum
+        fi
+    done
+fi
+
+SCREEN_NO=0
+SANITIZE_D=${DISPLAY//:/}
+[[ -n "${SANITIZE_D##*\.}" && ${SANITIZE_D##*\.} -ne 0 ]] && export SCREEN_NO=${SANITIZE_D##*\.}
+
+DEGROTATE=36
+DEGVIEWABLE=29
+DEGLOSSGAP=$(( ${DEGROTATE}-${DEGVIEWABLE} ))
+
+[[ -p ${MPVIDEOCTL} ]] || mkfifo ${MPVIDEOCTL} && chmod 0664 ${MPVIDEOCTL}
+
 if [[ $FRAME_NO -eq 0 ]]; then
+	[[ -p ${MPAUDIOCTL} ]] || mkfifo ${MPAUDIOCTL} && chmod 0664 ${MPAUDIOCTL}
 	MPLAYER_UDPOPT="-udp-master -udp-ip 10.42.${LG_OCTET}.255 -udp-port"
 	MPLAYER_AOOPT="-ao alsa"
 else
@@ -67,24 +93,33 @@ fi
 #   -ao alsa:device=asym51 -softvol \
 #    -vf screenshot,rectangle,crop=${WIDTH%%.*}::${CROPX%%.*}: \
 #    -vf screenshot,rectangle,crop=${WIDTH%%.*}:${HEIGHT%%.*}:${CROPX%%.*}:${CROPY%%.*} \
+if [ $SCREEN_NO -gt 0 ]; then
+    let MPLAYER_PORT=${MPLAYER_PORT}+2
+fi
 mplayer \
-    -quiet -nocache -osdlevel 0 \
+    -really-quiet -msglevel global=5 \
+    -nocache -osdlevel 0 \
     -nomouseinput -nograbpointer \
     -noconsolecontrols -idle -slave -input nodefault-bindings:file=${MPVIDEOCTL} \
     ${MPLAYER_UDPOPT} ${MPLAYER_PORT}\
     ${MPLAYER_AOOPT} \
     -vo vdpau,xv -fs \
     ${MPLAYER_VFOPT} \
-    -loop 0 "${VIDFILE}" \
-    2>${HOME}/tmp/mpvideo.err | while read line; do echo $line | grep ^ANS >>${HOME}/tmp/mpvideo.log; done &
+    -loop 0 -playlist "${VIDPLS}" \
+    2>${HOME}/tmp/mpvideo.err | while read line; do echo $line >>${HOME}/tmp/mpvideo.log; done &
 
-let MPLAYER_PORT=${MPLAYER_PORT}+1
-mplayer \
-    -quiet -nocache -osdlevel 0 \
-    -nomouseinput -nograbpointer \
-    -noconsolecontrols -idle -slave -input nodefault-bindings:file=${MPAUDIOCTL} \
-    ${MPLAYER_UDPOPT} ${MPLAYER_PORT} \
-    ${MPLAYER_AOOPT} \
-    -vo null \
-    -loop 0 "${VIDFILE}" \
-    2>${HOME}/tmp/mpaudio.err | while read line; do echo $line | grep ^ANS >>${HOME}/tmp/mpaudio.log; done &
+if [ $MASTER -gt 0 ]; then
+	let MPLAYER_PORT=${MPLAYER_PORT}+1
+	mplayer \
+	    -really-quiet -msglevel global=5 \
+	    -nocache -osdlevel 0 \
+	    -nomouseinput -nograbpointer \
+	    -noconsolecontrols -idle -slave -input nodefault-bindings:file=${MPAUDIOCTL} \
+	    ${MPLAYER_UDPOPT} ${MPLAYER_PORT} \
+	    ${MPLAYER_AOOPT} \
+	    -vo null \
+	    -loop 0 "${VIDFILE}" \
+	    2>${HOME}/tmp/mpaudio.err | while read line; do echo $line >>${HOME}/tmp/mpaudio.log; done &
+fi
+
+xdotool mousemove --screen 1 466 227 &

@@ -13,18 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+. ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --hosts|-h)
+            shift
+            LG_FRAMES="$1"
+          ;;
+    esac
+    shift   
+done
+
 LOG_FILE="${HOME}/tmp/squid-purge.log"
 echo "Purge: $(date)" >${LOG_FILE}
 
 echo "Killing Squid-related Procs"
-lg-sudo-bg "killall -9 squidmon.sh; squid3 -k kill" >>${LOG_FILE} 2>>${LOG_FILE}
+lg-sudo-bg --hosts "#{LG_FRAMES}" "killall -9 squidmon.sh; squid3 -k kill" >>${LOG_FILE} 2>>${LOG_FILE}
 echo "Moving Old Cache"
-lg-sudo-bg "mkdir -v /var/spool/squid3/oldcache; mv -vf /var/spool/squid3/* /var/spool/squid3/oldcache/" >>${LOG_FILE} 2>>${LOG_FILE}
+lg-sudo-bg --hosts "#{LG_FRAMES}" "mkdir -v /var/spool/squid3/oldcache; mv -vf /var/spool/squid3/* /var/spool/squid3/oldcache/" >>${LOG_FILE} 2>>${LOG_FILE}
 echo "Waiting for dust to settle" & sleep 3
 echo "Starting squid with Clean Cache"
-lg-sudo-bg "service squid3 start" >>${LOG_FILE} 2>>${LOG_FILE}
+lg-sudo-bg --hosts "#{LG_FRAMES}" "service squid3 start" >>${LOG_FILE} 2>>${LOG_FILE}
 echo "Purging \"oldcache\" dir"
-lg-sudo-bg "rm -rf /var/spool/squid3/oldcache" >>${LOG_FILE} 2>>${LOG_FILE}
-echo "Starting a new Squid Monitor"
-lg-run-bg "screen -c /dev/null -S squidmon -d -m \${HOME}/bin/squidmon.sh" >>${LOG_FILE} 2>>${LOG_FILE}
-
+lg-sudo-bg --hosts "#{LG_FRAMES}" "rm -rf /var/spool/squid3/oldcache" >>${LOG_FILE} 2>>${LOG_FILE}
+### below is available as an example, but nagios event handlers are now preferred
+#echo "Starting a new Squid Monitor"
+#lg-run-bg --hosts "#{LG_FRAMES}" "screen -c /dev/null -S squidmonitr -d -m \${HOME}/bin/squidmon.sh" >>${LOG_FILE} 2>>${LOG_FILE}

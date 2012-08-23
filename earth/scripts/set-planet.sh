@@ -14,9 +14,10 @@
 # limitations under the License.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 PLANET=${1:-earth}
 # set the planet using both old:
 lg-run "echo $PLANET >/lg/planet"
 # and new methods:
-lg-run "echo \"planet=$PLANET\" >/tmp/query.txt"
+lg-run "echo \"planet=$PLANET\" >${EARTH_QUERY}"

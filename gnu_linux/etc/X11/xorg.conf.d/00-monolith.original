@@ -1,0 +1,175 @@
+Section "ServerFlags"
+    Option         "DontVTSwitch"   "true"
+    Option         "DontZap"        "true"
+    Option         "DontZoom"       "true"
+
+    # these two really go together
+    Option         "AutoAddDevices"     "false"
+#    Option         "AutoAddDevices"     "true"
+    Option         "AllowMouseOpenFail" "true"
+EndSection
+
+Section "ServerLayout"
+    Identifier     "Layout0"
+    Screen      0  "Screen0"
+    Screen      1  "Screen1" rightOf "Screen0"
+    Screen      2  "Screen2" below   "Screen0"
+    Screen      3  "Screen3" rightOf "Screen2"
+    InputDevice    "dummy"
+#    InputDevice    "Keyboard0" "CoreKeyboard"
+    InputDevice    "Quanta Touch" "CorePointer"
+#    InputDevice    "Mouse0"
+    Option         "Xinerama" "0"
+EndSection
+
+Section "Extensions"
+    Option         "Composite"    "Disable"
+EndSection
+
+Section "InputDevice"
+    Identifier     "dummy"
+    Driver         "void"
+    Option         "Device" "/dev/input/mice"
+EndSection
+
+#Section "InputDevice"
+#    Identifier      "Mouse0"
+#    Driver          "evdev"
+#    Option          "Device"                "/dev/input/by-id/usb-Dell_Dell_USB_Mouse-event-mouse"
+#    Option          "SendCoreEvents"        "true"
+#EndSection
+
+Section "InputDevice"
+    Identifier      "Quanta Touch"
+    Driver          "evdev"
+    Option          "Device"                "/dev/input/quanta_touch"
+    Option          "SendCoreEvents"        "true"
+EndSection
+
+Section "Monitor"
+    Identifier     "Monitor0"
+    VendorName     "Samsung"
+    ModelName      "Series6"
+    Option         "DPMS"
+    Option         "DPI" "96 x 96"
+EndSection
+
+Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "PCI:1:0:0"
+    Screen         0
+    Option         "UseEvents" "false"
+    Option         "NoLogo" "true"
+    Option         "Coolbits"   "1"
+    Option         "BackingStore"   "true"
+    Option         "TripleBuffer"   "false" # causes Earth clampToGround bug
+    Option         "RenderAccel"    "true"
+    Option         "OnDemandVBlankInterrupts" "True"
+    Option         "RandRRotation"      "on"
+    Option         "UseDisplayDevice"   "DFP-1"
+EndSection
+
+Section "Device"
+    Identifier     "Device1"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "PCI:1:0:0"
+    Screen         1
+    Option         "UseEvents" "false"
+    Option         "NoLogo" "true"
+    Option         "Coolbits"   "1"
+    Option         "BackingStore"   "true"
+    Option         "TripleBuffer"   "false"
+    Option         "RenderAccel"    "true"
+    Option         "OnDemandVBlankInterrupts" "True"
+    Option         "RandRRotation"      "on"
+    Option         "UseDisplayDevice"   "DFP-0"
+EndSection
+
+Section "Device"
+    Identifier     "Device2"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "PCI:2:0:0"
+    Screen         0
+    Option         "UseEvents" "false"
+    Option         "NoLogo" "true"
+    Option         "Coolbits"   "1"
+    Option         "BackingStore"   "true"
+    Option         "TripleBuffer"   "false"
+    Option         "RenderAccel"    "true"
+    Option         "OnDemandVBlankInterrupts" "True"
+    Option         "RandRRotation"      "on"
+#    Option         "UseDisplayDevice"   "DFP-0"
+EndSection
+
+Section "Device"
+    Identifier     "Device3"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "PCI:2:0:0"
+    Screen         1
+    Option         "UseEvents" "false"
+    Option         "NoLogo" "true"
+    Option         "Coolbits"   "1"
+    Option         "BackingStore"   "true"
+    Option         "TripleBuffer"   "false"
+    Option         "RenderAccel"    "true"
+    Option         "OnDemandVBlankInterrupts" "True"
+    Option         "RandRRotation"      "on"
+#    Option         "UseDisplayDevice"   "DFP-1"
+EndSection
+
+Section "Screen"
+    Identifier     "Screen0"
+    Device         "Device0"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    Option         "metamodes" "DFP-0: nvidia-auto-select"
+    SubSection     "Display"
+        Depth       24
+	# set large virtual size of the screen to allow rotation with XRANDR
+	Virtual	    2048 2048
+    EndSubSection
+EndSection
+
+Section "Screen"
+    Identifier     "Screen1"
+    Device         "Device1"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    Option         "metamodes" "DFP-1: nvidia-auto-select"
+    SubSection     "Display"
+        Depth       24
+	# set large virtual size of the screen to allow rotation with XRANDR
+	Virtual	    2048 2048
+    EndSubSection
+EndSection
+
+Section "Screen"
+    Identifier     "Screen2"
+    Device         "Device2"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    Option         "metamodes" "DFP-0: nvidia-auto-select"
+    SubSection     "Display"
+        Depth       24
+	# set large virtual size of the screen to allow rotation with XRANDR
+	Virtual	    2048 2048
+    EndSubSection
+EndSection
+
+Section "Screen"
+    Identifier     "Screen3"
+    Device         "Device3"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    Option         "metamodes" "DFP-1: nvidia-auto-select"
+    SubSection     "Display"
+        Depth       24
+	# set large virtual size of the screen to allow rotation with XRANDR
+	Virtual	    2048 2048
+    EndSubSection
+EndSection

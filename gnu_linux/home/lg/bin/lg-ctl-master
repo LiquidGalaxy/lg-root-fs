@@ -27,6 +27,7 @@ if [ $ver -lt 54 ]; then
 fi
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 user="lg"
 usage="Usage: `basename $0` [-h]elp [-u user] [-c]heck [-k]ill"

@@ -1,0 +1,5 @@
+# "global" nvidia-ettings can go here
+# application-specific settings should be executed in that applications launcher
+nvidia-settings -c ${DISPLAY} --assign=${DISPLAY}/SyncToVBlank=1
+
+# vim:set ai et sts=4 ts=4 sw=4 expandtab filetype=sh:

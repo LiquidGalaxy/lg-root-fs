@@ -18,10 +18,10 @@
 if [[ "$1" == "master" ]]; then
     shift
     if [[ $FRAME_NO == 0 ]]; then
-        echo "$*" | tee $( dirname ${MPVIDEOCTL} )/*${MPVIDEOCTL##*_} >/dev/null
+        echo "$*" | timeout 3 tee $( dirname ${MPVIDEOCTL} )/*${MPVIDEOCTL##*_} >/dev/null
     fi
 else
-    lg-run-bg "[ \$( cat /lg/frame ) -eq 0 ] && sleep .5; echo \"$*\" | tee $( dirname ${MPVIDEOCTL} )/*${MPVIDEOCTL##*_} >/dev/null"
+    lg-run-bg "[ \$( cat /lg/frame ) -eq 0 ] && sleep .5; echo \"$*\" | timeout 3 tee $( dirname ${MPVIDEOCTL} )/*${MPVIDEOCTL##*_} >/dev/null"
 fi
 
 exit 0

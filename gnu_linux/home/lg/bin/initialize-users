@@ -2,15 +2,15 @@
 
 MYUID=$( id -u )
 if [[ $MYUID -ne 0 ]]; then logger -p local3.err "$0: need root privs"; exit 1; fi
-#if [[ ${#@} -lt 1 ]]; then logger -p local3.err "$0: need screen number"; exit 1; fi
 
 SKELUSER="lg"
 SKELHOME="/home/${SKELUSER}"
 . ${SKELHOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 EARTHINSTALL=$( basename `readlink ${SKELHOME}/earth/builds/latest` )
 
-if [ ${LG_SCREEN_COUNT} -le 1 ]; then logger -p local3.info "$0: just one screen. GTG"; exit 0; fi
+if [ ${LG_SCREEN_COUNT} -le 1 ]; then lg-log "just one screen in persona. GTG"; exit 0; fi
 
 # screens are counted from zero, but zero is the default screen
 # initialize users for any additional screens
@@ -20,7 +20,10 @@ while [ $MYSCREEN -lt ${LG_SCREEN_COUNT} ]; do
     newuser="lgS${MYSCREEN}"
     userdir="/home/${newuser}"
     useradd -c "Galaxy Screen ${MYSCREEN}" -d ${userdir} -g lg -m -s /bin/bash ${newuser}
-    sudo -u ${newuser} -H mkdir -p ${userdir}/{.config/Google,.googleearth,tmp}
+    sudo -u ${newuser} -H xdg-user-dirs-update
+    sudo -u ${newuser} -H mkdir -p ${userdir}/{.config/Google,.googleearth,tmp,log}
+    sudo -u ${newuser} -H cp -aR ${SKELHOME}/.googleearth/Cache ${userdir}/.googleearth/
+    sudo -u ${newuser} -H cp -aR ${SKELHOME}/.googleearth/*kmz ${userdir}/.googleearth/
     sudo -u ${newuser} -H rsync -a --delete --link-dest=${SKELHOME}/bin ${SKELHOME}/bin/ ${userdir}/bin
     sudo -u ${newuser} -H rsync -a --delete --link-dest=${SKELHOME}/etc ${SKELHOME}/etc/ ${userdir}/etc
     sudo -u ${newuser} -H rsync -a --delete --link-dest=${SKELHOME}/earth --exclude=**builds/* ${SKELHOME}/earth/ ${userdir}/earth

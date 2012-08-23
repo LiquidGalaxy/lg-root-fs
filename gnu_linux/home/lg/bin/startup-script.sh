@@ -13,32 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-echo "DISPLAY = \"$DISPLAY\"."
-echo "DISPLAY_portion = \"${DISPLAY##*\.}\"."
-
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
-FRAME_NO="$(cat /lg/frame)"
-
+echo "$0: $( date )"
+echo "DISPLAY = \"$DISPLAY\"."
+echo "DISPLAY_SCREEN = \"${DISPLAY##*\.}\"."
 echo "MY FRAME = \"${FRAME_NO}\"."
 
-if [[ $FRAME_NO = 0 ]]; then
-    # a kiosk browser-based experience on a second display, 
-    # and the earth.tcl search interface below are mutually exclusive.
-    # -- uncomment the one you like --
-    if [[ "${DISPLAY##*\.}" = "1" ]]; then
-        echo "launching kiosk browser on second screen"
-        sed -i -e 's/exited_cleanly.*/exited_cleanly\":\ true,/' ${HOME}/.config/chromium/Default/Preferences && \
-        rm -f ${HOME}/.config/chromium/Singleton*
-        gnome-www-browser --user-data-dir=${HOME}/.cache/tschromium --disable-session-storage --kiosk --no-first-run localhost:81 &
+# basic items for any screen/any window manager
+xsetroot -solid black &
+xset dpms 0 0 0 -dpms s blank s noexpose s 0 0 &
+xinput set-int-prop "3Dconnexion SpaceNavigator" "Device Enabled" 8 0 &
+xhost +local: &
+
+if [ $FRAME_NO -eq 0 ]; then
+    if [ ${DISPLAY##*\.} -eq 1 ]; then
+        nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-noframe.png &
+        lg-log "launching kiosk browser on second screen"
+        x-www-browser --temp-profile --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --app="${LG_PHPIFACE}" &
         exit
     fi
-
+    
     nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-${FRAME_NO}.png &
-    ${SCRIPDIR}/launch-earth.sh &
-    sleep 3
-#    ${HOME}/bin/earth.tcl &
+    lg-log "executing galaxy launcher"
+    ${SCRIPDIR}/launch-galaxy.sh &
+    sleep 60
+    lg-log "performing one-shot lowmem kill"
+    ${HOME}/bin/lg-lowmem-kill
+  
 elif [[ $FRAME_NO -ge 1 ]]; then
+    # slaves just set desktop and wait for master
     nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-${FRAME_NO}.png &
 else
     # will wait up to 9 seconds in increments of 3
@@ -46,9 +51,10 @@ else
     IP_WAIT=0
     
     nitrogen --set-tiled ${XDG_PICTURES_DIR}/backgrounds/lg-bg-noframe.png &
-
+      
     while [[ $IP_WAIT -le 9 ]]; do
         PRIMARY_IP="$(ip addr show dev eth0 primary | awk '/inet\ / { print $2}')"
+        PRIMARY_MAC="$(ip link show eth0 | awk '/link\/ether\ / { print $2 }' )"
         if [[ -z $PRIMARY_IP ]]; then
             let IP_WAIT+=3
             sleep 3
@@ -56,12 +62,14 @@ else
             break
         fi
     done
-
+    
     # notify user
-    xmessage \
-"\"Personality\" assignment is _essential_
-My primary IP address: $PRIMARY_IP
-
-Utilize ${HOME}/bin/personality.sh with root priv."
+#    xmessage \
+    zenity --width=500 --error --title="Please Assign Personality" \
+    --text="<span size=\"x-large\"> \"Personality\" assignment is <b>essential</b>.
+  
+My primary IP address: \"${PRIMARY_IP}\"
+My primary MAC address: \"${PRIMARY_MAC}\"
+    
+Utilize ${HOME}/bin/personality.sh with root priv.</span>"
 fi
-

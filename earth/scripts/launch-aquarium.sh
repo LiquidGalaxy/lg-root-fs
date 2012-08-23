@@ -14,9 +14,17 @@
 # limitations under the License.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
-echo "run-earth.sh running"
+LOGFILE=${HOME}/log/launch-aquarium.log
 
-cd ${SCRIPDIR} || exit 1
-
-./run-earth-bin.sh
+if [[ "${FRAME_NO}" = "0" ]]; then
+    echo "[$( date )] launch-aquarium" > $LOGFILE
+    {
+    lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
+    pkill -f viewsyncrelay.pl
+    pkill -u $(id -u) socat
+    sleep 1
+    ${HOME}/bin/lg-run-bg ${HOME}/bin/lg-chromium webglsamples/aquarium/aquarium.html '100%25%20HTML5%2C%20WebGL%20and%20JavaScript.%208%20machines%20running%20Chrome%20using%20WebSockets%2C%20node.js%20and%20socket.io%20to%20stay%20in%20sync.'
+    } >>$LOGFILE 2>&1
+fi
