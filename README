@@ -1,21 +1,22 @@
 == WITHIN THIS REPOSITORY ==
 
-The "gnu_linux" directory contains example configuration files to aid
+The repository contains example configuration files to aid
 with setup of various software pieces. The philosophy employed was
 one of letting the underlying distribution simplify the overall setup.
 
 This meant leveraging the default behavior of "Xsession", the 
 "alternatives" system, and various hook or "$product.d" directories.
 
-The "php-interface" directory contains an example collection of code
-used to provide a touchscreen interface for selecting queries and coordinates
-to be consumed by Google Earth. Place everything into a WebServer's Docroot.
+Finally, there is a post-checkout hook included which may be useful
+in correcting "working tree" file ownership (which are throughout 
+the filesystem).
 
 == ON THE SYSTEM ==
 
-NOTE: with SVN, it is up to the client to handle symlinks. If your client
-doesn't handle symlinks, you might end up with some duplicate files with
-various names, but things should still work fine.
+The repository is meant to be cloned to the root of the filesystem by 
+the root user. Certainly, this makes the example repository much more
+distribution-specific. However, it may certainly make your life simpler.
+It does ours :).
 
 The following tree represents the suggested directory hierarchy 
 within the "lg" user's home directory:
@@ -24,8 +25,8 @@ within the "lg" user's home directory:
 |-- bin
 |-- earth
 |   |-- builds
-|   |   |-- latest -> ./5.2.X.XXXX-X
-|   |   `-- 5.2.X.XXXX-X
+|   |   |-- latest -> ./6.2.X.XXXX-X
+|   |   `-- 6.2.X.XXXX-X
 |   |-- config
 |   |   |-- master
 |   |   `-- slave
@@ -36,6 +37,6 @@ within the "lg" user's home directory:
         |-- backgrounds
         `-- google
 
-Using example scripts and tools within this repo, there should also be a "/lg"
-directory on the system owned by "lg" user.
+When using example scripts and tools within this repo, there will be
+an "/lg" directory on the system owned by "lg" user.
 
