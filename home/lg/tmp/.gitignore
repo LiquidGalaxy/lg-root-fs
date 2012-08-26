@@ -1,0 +1,6 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE specific items
+!.gitignore
+!README

@@ -1,0 +1,6 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE whitelisted items
+!.gitignore
+!dhclient-script-nm

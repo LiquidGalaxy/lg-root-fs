@@ -1,0 +1,10 @@
+# INGORE everything by default
+*
+
+# DO NOT IGNORE _whitelisted_items_ within subdirectories
+!*/
+
+# whitelisted items
+!.gitignore
+!LICENSE
+!README
