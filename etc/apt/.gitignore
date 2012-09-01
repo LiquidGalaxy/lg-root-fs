@@ -1,0 +1,9 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE subdirs
+!*/
+
+# DO NOT IGNORE whitelisted items
+!.gitignore
+!apt.conf.d/42recommends

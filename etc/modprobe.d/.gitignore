@@ -1,0 +1,10 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE whitelisted items in subdirs
+!*/
+
+# DO NOT IGNORE whitelisted items
+!.gitignore
+!nvidia-driver.conf
+!r8168-dkms.conf

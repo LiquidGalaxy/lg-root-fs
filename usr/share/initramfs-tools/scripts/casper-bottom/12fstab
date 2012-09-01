@@ -1,0 +1,37 @@
+#!/bin/sh
+
+PREREQ=""
+DESCRIPTION="Configuring fstab..."
+FSTAB=/root/etc/fstab
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+cat > $FSTAB <<EOF
+${UNIONFS} / ${UNIONFS} rw 0 0
+tmpfs /tmp tmpfs nosuid,nodev 0 0
+
+# mount squid and www partitions if exist
+LABEL=SQUID   /var/spool/squid3    ext4    relatime,user_xattr,nobootwait   0    0
+LABEL=WWW     /var/www             ext4    relatime,user_xattr,nobootwait   0    0
+# NFS mount for media shared by Head Node
+lg-head:/media/lgmedia /media      nfs     nobootwait                       0    0
+EOF
+
+rm -f /root/etc/rcS.d/S*checkroot.sh
+
+log_end_msg

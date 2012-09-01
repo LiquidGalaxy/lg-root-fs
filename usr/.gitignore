@@ -1,0 +1,14 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE whitelisted items in subdirs
+!*/
+
+# DO NOT IGNORE whitelisted items
+!.gitignore
+!share/initramfs-tools/scripts/casper-bottom/12fstab
+!share/initramfs-tools/scripts/casper-bottom/18hostname
+!share/initramfs-tools/scripts/casper-bottom/25configure_init
+
+# IGNORE even with whitelisted items
+src

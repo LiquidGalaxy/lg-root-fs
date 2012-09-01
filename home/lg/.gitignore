@@ -2,4 +2,11 @@
 !*
 
 # IGNORE specific items
-
+.bash_history
+.rpmdb/
+.selected_editor
+.viminfo
+bin/led-enable
+earth/builds/latest
+earth/scripts/launch-galaxy.sh
+src/liquid-galaxy-ro

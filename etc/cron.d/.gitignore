@@ -1,0 +1,9 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE whitelisted items in subdirs
+!*/
+
+# DO NOT IGNORE whitelisted items
+!.gitignore
+!42-lgcron
