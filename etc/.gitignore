@@ -17,7 +17,7 @@ apparmor.d/
 apparmor/
 at.deny
 avahi/
-bash.bashrc
+bash_completion
 bash_completion.d/
 bindresvport.blacklist
 blkid.conf
