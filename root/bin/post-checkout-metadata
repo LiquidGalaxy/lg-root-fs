@@ -6,8 +6,13 @@
 # a lot of root-owned files that need to be adjusted
 # in order to have proper functionality.
 
-echo -n "prev_head_ref = $1, "
-echo -n "new_head_ref = $2, "
-echo "branch_flag = $3"
+LOG_FILE=/tmp/git-hook.log
+function log {
+    echo "$@" | tee -a ${LOG_FILE}
+}
 
-echo chown -vR lg: home/lg
+log "prev_head_ref = $1"
+log "new_head_ref = $2"
+log "branch_flag = $3"
+
+log "chown -vR lg: home/lg"
