@@ -2,24 +2,26 @@
 #
 # THIS SCRIPT IS CRUCIAL FOR AN LG IMAGE
 # 
-# performing git checkout as root leaves us with
-# a lot of root-owned files that need to be adjusted
-# in order to have proper functionality.
-
-## try using the git bash_completion functions
-. /etc/bash_completion.d/git 2>/dev/null
-gitdir=$(__git_dir 2>/dev/null)
-
-## fallback
-# assumption: the git directory is in the root of the filesystem
-# BUT we do not assume the root of the filesystem is "/" - we may be 
-# a chroot dir or similar, being manipulated prior to 'chroot'.
-GIT_DIR="${gitdir:-$( dirname $0 )/../../.git}"
+# performing git checkout as root leaves us with a lot of root-owned files
+# that need to be adjusted in order to have proper functionality.
 
 LOG_FILE=/tmp/git-hook.log
 function log {
     echo "$@" | tee -a ${LOG_FILE}
 }
+
+# IF NOT RUNNING WITH ROOT PRIVS, EXIT
+if [ `id -u` -ne 0 ]; then
+    log "root privilege is required"
+    exit
+fi
+
+## TRY using the git-provided environment variable 
+## but provide a fallback
+# assumption: the git directory is in the root of the filesystem
+# BUT we do not assume the root of the filesystem is "/" - we may be 
+# a chroot dir or similar, being manipulated prior to 'chroot'.
+GIT_DIR="${GIT_DIR:-$( dirname $0 )/../../.git}"
 
 log "prev_head_ref = $1"
 log "new_head_ref = $2"
@@ -27,5 +29,13 @@ log "branch_flag = $3"
 log "git_dir = ${GIT_DIR}"
 
 LG_HOME="${GIT_DIR}/../home/lg"
-log "chown -vR lg: ${LG_HOME}"
-ls -l ${LG_HOME}
+# can we get info from etc/passwd
+ETC_UID=$( awk -F':' '/^lg/ { print $3 }' ${GIT_DIR}/../etc/passwd 2>/dev/null )
+ETC_GID=$( awk -F':' '/^lg/ { print $4 }' ${GIT_DIR}/../etc/passwd 2>/dev/null )
+# if not, use 1000
+LG_UID=${ETC_UID:-1000}
+LG_GID=${ETC_GID:-1000}
+
+log "chown --preserve-root --changes --recursive ${LG_UID}:${LG_GID} ${LG_HOME}"
+chown --preserve-root --changes --recursive ${LG_UID}:${LG_GID} ${LG_HOME}
+
