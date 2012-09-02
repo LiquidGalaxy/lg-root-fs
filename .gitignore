@@ -12,3 +12,5 @@
 # blacklist even with whitelisted items
 lib/
 var/
+proc/
+sys/

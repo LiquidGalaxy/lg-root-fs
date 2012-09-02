@@ -1,0 +1,5 @@
+# IGNORE EVERYTHING
+*
+# WHITELIST specific items
+!.gitignore
+!post-checkout-metadata

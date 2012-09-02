@@ -1,7 +1,11 @@
-#
+# IGNORE everything
 *
-
+ 
+# DO NOT IGNORE whitelised items in subdirs
 */
 
+# WHITELIST specific items
 !.gitignore
 !.bashrc
+!.profile
+!bin/
