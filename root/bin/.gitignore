@@ -1,5 +1,6 @@
 # IGNORE EVERYTHING
 *
+
 # WHITELIST specific items
 !.gitignore
 !lg-post-checkout-metadata

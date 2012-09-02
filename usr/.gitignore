@@ -4,7 +4,7 @@
 # DO NOT IGNORE whitelisted items in subdirs
 !*/
 
-# DO NOT IGNORE whitelisted items
+# WHITELIST specific items
 !.gitignore
 !share/initramfs-tools/scripts/casper-bottom/12fstab
 !share/initramfs-tools/scripts/casper-bottom/18hostname

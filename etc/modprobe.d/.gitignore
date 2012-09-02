@@ -4,7 +4,7 @@
 # DO NOT IGNORE whitelisted items in subdirs
 !*/
 
-# DO NOT IGNORE whitelisted items
+# WHITELIST specific items
 !.gitignore
 !nvidia-driver.conf
 !r8168-dkms.conf

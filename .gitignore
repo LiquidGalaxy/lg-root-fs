@@ -1,15 +1,15 @@
 # INGORE everything by default
 *
 
-# DO NOT IGNORE _whitelisted_items_ within subdirectories
+# DO NOT IGNORE _whitelisted_items_ within subdirs
 !*/
 
-# whitelisted items
+# WHITELIST specific items
 !.gitignore
 !LICENSE
 !README
 
-# blacklist even with whitelisted items
+# BLACKLIST even with whitelisted items
 lib/
 var/
 proc/
