@@ -2,4 +2,4 @@
 *
 # WHITELIST specific items
 !.gitignore
-!post-checkout-metadata
+!lg-post-checkout-metadata
