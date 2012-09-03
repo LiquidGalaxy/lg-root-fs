@@ -40,5 +40,5 @@ log "chown to ${LG_UID}:${LG_GID} for all of ${LG_HOME}"
 chown --preserve-root --changes --recursive ${LG_UID}:${LG_GID} ${LG_HOME}
 
 log "chmod sudoers files"
-chmod --preserve-root --changes 0440 /etc/sudoers
-chmod --preserve-root --changes 0440 /etc/sudoers.d/*
+chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers
+chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers.d/*
