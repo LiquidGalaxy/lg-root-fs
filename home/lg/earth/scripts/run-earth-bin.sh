@@ -69,7 +69,7 @@ cp -a ${LGKMLDIR}/${DIR}/* ${HOME}/.googleearth/
 sed -i -e "s:##HOMEDIR##:${HOME}:g" ${HOME}/.config/Google/*.conf
 # expand vars (may contain ":" and "/") in kml files
 sed -i \
-  -e "s@##LG_PHPIFACE##@${LG_PHPIFACE}@g" \
+  -e "s@##LG_IFACE_BASE##@${LG_IFACE_BASE}@g" \
   -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${ME_SCREEN:-0}]}@g" \
   -e "s@##CHECK_REF##@$(cat /etc/hostname)-${ME_SCREEN:-0}@g" ${HOME}/.googleearth/*.kml
 

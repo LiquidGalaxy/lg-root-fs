@@ -31,7 +31,7 @@ if [ $FRAME_NO -eq 0 ]; then
     if [ ${DISPLAY##*\.} -eq 1 ]; then
         nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-noframe.png &
         lg-log "launching kiosk browser on second screen"
-        x-www-browser --temp-profile --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --app="${LG_PHPIFACE}" &
+        x-www-browser --temp-profile --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --app="${LG_IFACE_BASE}" &
         exit
     fi
     

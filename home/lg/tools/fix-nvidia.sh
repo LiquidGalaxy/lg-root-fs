@@ -40,6 +40,7 @@ if [[ $SANITY -ge 1 ]]; then
     echo "APPEARS UN-SANE!"
     # execute silent library installation
     $NVINSTALL -a -N -n --no-kernel-module --no-x-check --silent 
+    #$NVINSTALL -a -N -n --no-x-check --dkms --no-runlevel-check --disable-nouveau -k `ls -r1 --sort=version /boot/initrd.img* | head -n 1 | sed -e 's:/boot/initrd.img-::g'` --silent
     exit $?
 else
     echo "APPEARS SANE!"
