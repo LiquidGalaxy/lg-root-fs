@@ -6,8 +6,8 @@ else
     ln -snf default-rc.lua ${HOME}/.config/awesome/rc.lua
 fi
 echo "executing LG startup-script"
-${HOME}/bin/startup-script.sh | tee logger -p local3.info -i -s 2>>/tmp/err 1>>/tmp/out &
+${HOME}/bin/startup-script.sh 3>&1 1>>/tmp/out 2>&3 3>&- | logger -p local3.err -i -s 2>>/tmp/err &
 echo "executing window manager"
 exec x-window-manager
 
-# vim: set ai et sts=2 sw=2 tw=80 filetype=sh:
+# vim: set ai et sts=2 sw=2 filetype=sh:
