@@ -27,7 +27,7 @@ usage="Usage: `basename $0` [-h]elp [-u user] [-b binary] [-n window_name] [-c c
     -k: only try this many times (not equal to wall-clock time) befoore kill n exit (defaults to \"20\")\n
 "
 
-while getopts ":hp:b:n:c:k:" opt; do
+while getopts ":hu:b:n:c:k:" opt; do
   case $opt in
     h)
       echo -e $usage >&2
