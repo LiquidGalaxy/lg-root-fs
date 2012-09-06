@@ -1,0 +1,6 @@
+LG_SYSLOG_FILE="/etc/rsyslog.d/42-galaxy.conf"
+
+if [ "$reason" = "BOUND" -a -n "$new_log_servers" ]; then
+    sed -i -e "s:\@lg-head:\@$new_log_servers:g" ${LG_SYSLOG_FILE} \
+    && service rsyslog restart
+fi
