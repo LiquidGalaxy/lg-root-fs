@@ -114,7 +114,6 @@ libao.conf
 libnl-3/
 lightdm/
 lighttpd/conf-available/
-lighttpd/conf-enabled/
 lirc/
 locale.alias
 locale.nopurge

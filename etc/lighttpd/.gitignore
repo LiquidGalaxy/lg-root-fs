@@ -1,0 +1,12 @@
+# IGNORE everything
+*
+
+# DO NOT IGNORE whitelisted items in subdirs
+!*/
+
+# WHITELIST specific items
+!.gitignore
+!lighttpd.conf
+!conf-enabled/05-serverport.conf
+!conf-enabled/10-accesslog.conf
+!conf-enabled/10-cgi.conf

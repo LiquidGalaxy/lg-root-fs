@@ -38,7 +38,7 @@ if [[ "${ME_USER}" == "lg" ]]; then
         if [[ -d ${screen} ]]; then
             screennum=${screen##/home/lgS}
             lg-log "launching \"$ME\" for my screen \"${screennum}\""
-            sudo -u lgS${screennum} -H DISPLAY=:0.${screennum} ${SCRIPDIR}/${ME} ${@} &
+            sudo -u lgS${screennum} -H ME_SCREEN=${screennum} ${SCRIPDIR}/${ME} ${@} &
             unset screennum
         fi
     done
@@ -50,12 +50,18 @@ SANITIZE_D=${DISPLAY//:/}
 export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating scree
 
 cd ${SCRIPDIR} || exit 1
-lg-log "running write-drivers - S:\"${SCREEN_NO}\"."
+lg-log "running write-drivers - S:\"${ME_SCREEN:-0}\"."
 ./write-drivers-ini.sh
 
 if [ $FRAME_NO -eq 0 ] ; then
+    if [ ${ME_SCREEN} -eq 0 ]; then
+        WIN_NAME="ge-ts"
+    else
+        WIN_NAME="ge-${ME_USER}"
+    fi
     DIR=master
 else
+    WIN_NAME="ge-${ME_USER}"
     DIR=slave
 fi
 
@@ -73,8 +79,8 @@ sed -i -e "s:##HOMEDIR##:${HOME}:g" ${HOME}/.config/Google/*.conf
 # expand vars (may contain ":" and "/") in kml files
 sed -i \
   -e "s@##LG_PHPIFACE##@${LG_PHPIFACE}@g" \
-  -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${SCREEN_NO:-0}]}@g" \
-  -e "s@##CHECK_REF##@$(cat /etc/hostname)-${SCREEN_NO:-0}@g" ${HOME}/.googleearth/*.kml
+  -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${ME_SCREEN:-0}]}@g" \
+  -e "s@##CHECK_REF##@$(cat /etc/hostname)-${ME_SCREEN:-0}@g" ${HOME}/.googleearth/*.kml
 
 while true ; do
     if [[ "$DIR" == "master" ]]; then
@@ -98,7 +104,7 @@ while true ; do
     lg-log "running earth"
     #./googleearth -style cleanlooks --fullscreen -font "-adobe-helvetica-bold-r-normal-*-${LG_FONT_SIZE}-*-*-*-p-*-iso8859-1"
     LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ &
-    lg-proc-watch -p ${ME_USER} -b googleearth-bin -n "Google Earth" -c ge-lgS0 -k 20
+    lg-proc-watch -p ${ME_USER} -b googleearth-bin -n "Google Earth" -c ${WIN_NAME} -k 20
 
     [ -w $SPACENAVDEV ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
     sleep 3
