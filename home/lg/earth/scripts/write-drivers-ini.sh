@@ -18,17 +18,14 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
-# FRAME_NO is set by personality
-if [[ ${FRAME_NO} -gt $(( ${LG_FRAMES_MAX}/2 )) ]] ; then
-    FRAME_NO="$(( ${FRAME_NO} - ${LG_FRAMES_MAX} ))"
-fi
-
-MASTER="false"
-SLAVE="true"
-if [ $FRAME_NO -eq 0 ] ; then
+if [ "${LG_MASTERSLAVE[${ME_SCREEN:-0}]}" == "master" ]; then
     MASTER="true"
     SLAVE="false"
+else
+    MASTER="false"
+    SLAVE="true"
 fi
+lg-log "master/slave: ${LG_MASTERSLAVE[${ME_SCREEN:-0}]} M=${MASTER} S=${SLAVE}"
 
 MYIPALIAS="$( awk '/^ifconfig/ {print $3}' /etc/network/if-up.d/*-lg_alias )"
 VSYNCCHOP="${MYIPALIAS%.*}"

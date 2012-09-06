@@ -18,21 +18,21 @@ VERSION="1.0"
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
-usage="Usage: `basename $0` [-h]elp [-p user] [-b binary] [-n window_name] [-c classname] [-k kill_time]\n
+usage="Usage: `basename $0` [-h]elp [-u user] [-b binary] [-n window_name] [-c classname] [-k kill_time]\n
     -h: this help message\n
-    -p: the username who should own the binary (defaults to \"lg\")\n
+    -u: the username who should own the binary (defaults to \"lg\")\n
     -b: the binary which should be running (defaults to \"googleearth-bin\")\n
     -n: the name of the window which the binary should create (defaults to \"Google Earth\")\n
     -c: the string which should be set for the WM_CLASS instance (defaults to \"ge-lgS0\")\n
     -k: only try this many times (not equal to wall-clock time) befoore kill n exit (defaults to \"20\")\n
 "
 
-while getopts :hp:b:n:c:k: opt; do
+while getopts ":hp:b:n:c:k:" opt; do
   case $opt in
     h)
       echo -e $usage >&2
       exit 0;;
-    p)
+    u)
       cmd_user_name="${OPTARG}"
       ;;
     b)
@@ -71,7 +71,7 @@ pid_find_max=6
 retry_sleep=.3
 
 while [ ${pid_find_fails} -lt ${pid_find_max} ]; do
-  bin_pid=$( pgrep -u ${user_name} ${monitor_bin} 2>/dev/null )
+  bin_pid=$( pgrep -o -u ${user_name} ${monitor_bin} 2>/dev/null )
   if [ -z "${bin_pid}" ]; then
     lg-log -l err -m "could not identify pid for bin \"${monitor_bin}\""
     sleep ${retry_sleep}
@@ -88,9 +88,11 @@ while kill -0 ${bin_pid} 2>/dev/null; do
     bin_window=$( xdotool search --all --pid ${bin_pid} --name "${bin_win_name}" 2>/dev/null ) || break
     if [ -n "${bin_window}" ] && [[ ! "$( xprop -id ${bin_window} WM_CLASS 2>/dev/null )" =~ ${win_class} ]]; then
       lg-log -m "adjusting window properites for window id \"${bin_window}\" from pid \"${bin_pid}\""
-      xdotool set_window --classname ${win_class} ${bin_window} 2>/dev/null
-      lg-log -m "restarting window manager"
-      echo "awesome.restart()" | awesome-client
+      xdotool set_window --classname ${win_class} ${bin_window} 2>/dev/null && { \
+        sleep ${retry_sleep}
+        lg-log -m "restarting window manager"
+        echo "awesome.restart()" | awesome-client;
+      }
       check_count=$(( ${check_count}+1 ))
       sleep ${retry_sleep}
     else

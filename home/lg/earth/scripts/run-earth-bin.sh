@@ -47,23 +47,14 @@ fi
 [[ -n "${DISPLAY}" ]] || export DISPLAY=:0.0
 SANITIZE_D=${DISPLAY//:/}
 [ -n "${SANITIZE_D##*\.}" -a ${SANITIZE_D##*\.} -ne 0 ] && export SCREEN_NO=${SANITIZE_D##*\.}
-export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating scree
+export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating screen
 
-cd ${SCRIPDIR} || exit 1
+cd ${SCRIPDIR} || { lg-log "could not cd into script dir, \"${SCRIPDIR}\"."; exit 1; }
 lg-log "running write-drivers - S:\"${ME_SCREEN:-0}\"."
-./write-drivers-ini.sh
+ME_SCREEN=${ME_SCREEN} ./write-drivers-ini.sh
 
-if [ $FRAME_NO -eq 0 ] ; then
-    if [ ${ME_SCREEN} -eq 0 ]; then
-        WIN_NAME="ge-ts"
-    else
-        WIN_NAME="ge-${ME_USER}"
-    fi
-    DIR=master
-else
-    WIN_NAME="ge-${ME_USER}"
-    DIR=slave
-fi
+DIR="${LG_MASTERSLAVE[${ME_SCREEN:-0}]}"
+WIN_NAME="${EARTH_WINNAME[${ME_SCREEN:-0}]}"
 
 MYCFGDIR="${CONFGDIR}/${DIR}"
 # build the configuration file
@@ -104,7 +95,7 @@ while true ; do
     lg-log "running earth"
     #./googleearth -style cleanlooks --fullscreen -font "-adobe-helvetica-bold-r-normal-*-${LG_FONT_SIZE}-*-*-*-p-*-iso8859-1"
     LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ &
-    lg-proc-watch -p ${ME_USER} -b googleearth-bin -n "Google Earth" -c ${WIN_NAME} -k 20
+    lg-proc-watch -u ${ME_USER} -b googleearth-bin -n "Google Earth" -c ${WIN_NAME} -k 20
 
     [ -w $SPACENAVDEV ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
     sleep 3
