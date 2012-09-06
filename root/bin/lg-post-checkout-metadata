@@ -23,10 +23,7 @@ fi
 # a chroot dir or similar, being manipulated prior to 'chroot'.
 GIT_DIR="${GIT_DIR:-$( dirname $0 )/../../.git}"
 
-log "prev_head_ref = $1"
-log "new_head_ref = $2"
-log "branch_flag = $3"
-log "git_dir = ${GIT_DIR}"
+log "prev_head_ref = $1, new_head_ref = $2, branch_flag = $3, git_dir = ${GIT_DIR}"
 
 LG_HOME="${GIT_DIR}/../home/lg"
 # can we get info from etc/passwd
@@ -38,6 +35,7 @@ LG_GID=${ETC_GID:-1000}
 
 log "chown to ${LG_UID}:${LG_GID} for all of ${LG_HOME}"
 chown --preserve-root --changes --recursive ${LG_UID}:${LG_GID} ${LG_HOME}
+chmod --preserve-root --changes --recursive g+w ${LG_HOME}/earth/config
 
 log "chmod sudoers files"
 chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers
