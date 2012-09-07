@@ -1,0 +1,65 @@
+<!--
+  Ginn Wishes better suited for Google Earth
+  David Metge <metge.david@gmail.com> - September 21st 2011
+-->
+<ginn>
+  <global>
+
+    <!-- Pinch to Zoom in or out -->
+    <wish gesture="Pinch" fingers="2">
+      <action name="zoomin" when="update">
+        <trigger prop="radius delta" min="-80" max="-20"/>
+        <button>5</button>
+      </action>
+    </wish>
+    <wish gesture="Pinch" fingers="2">
+      <action name="zoomout" when="update">
+        <trigger prop="radius delta" min="20" max="80"/>
+        <button>4</button>
+      </action>
+    </wish>
+
+    <!-- Drag to increase/decrease the altitude -->
+    <wish gesture="Drag" fingers="2">
+      <action name="alt_up" when="update">
+        <trigger prop="delta y" min="20" max="80"/>
+        <button modifier1="Shift_L">5</button>
+      </action>
+    </wish>
+    <wish gesture="Drag" fingers="2">
+      <action name="alt_down" when="update">
+        <trigger prop="delta y" min="-80" max="-20"/>
+        <button modifier1="Shift_L">4</button>
+      </action>
+    </wish>
+
+    <!-- Drag with 3 fingers to rotate -->
+    <wish gesture="Drag" fingers="3">
+      <action name="tilt_up" when="update">
+        <trigger prop="delta y" min="20" max="80"/>
+        <button modifier1="Control_L">5</button>
+      </action>
+    </wish>
+    <wish gesture="Drag" fingers="3">
+      <action name="tilt_down" when="update">
+        <trigger prop="delta y" min="-80" max="-20"/>
+        <button modifier1="Control_L">4</button>
+      </action>
+    </wish>
+
+    <!-- Rotate -->
+    <wish gesture="Rotate" fingers="2">
+      <action name="rotatecw" when="update">
+        <trigger prop="angle delta" min="0.08" max="1.5"/>
+        <key modifier1="Control_L">Left</key>     
+      </action>
+    </wish>
+    <wish gesture="Rotate" fingers="2">
+      <action name="rotateccw" when="update">
+        <trigger prop="angle delta" min="-1.5" max="-0.08"/>
+        <key modifier1="Control_L">Right</key>    
+      </action>
+    </wish>
+
+  </global>
+</ginn>

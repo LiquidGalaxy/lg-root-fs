@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+## This will be executed as root as part of the 
+## lightdm upstart job
+
+# we need root privileges, but we must also exit without error
+if [ "$( id -u )" != "0" ]; then
+    exit 0
+fi
+[ -r /lg/personavars.txt ] && . /lg/personavars.txt
+
+XORGCONF_D="/etc/X11/xorg.conf.d"
+LAYOUTFILE="20-serverlayout.conf"
+INPUT_DEVS="40-inputdevices.conf"
+MOUSEPRFDEV=${DHCP_MOUSEPRFDEV:-"$( ls -1 /dev/input/by-id/*-event-mouse 2>/dev/null | head -n 1 )"}
+
+if [ "${DHCP_MOUSEENABLE}" == "true" ]; then
+    awk '/Event\ Mouse/{ gsub(/^[ \t]?#/,"")};{ print }' ${XORGCONF_D}/${LAYOUTFILE} >/tmp/${LAYOUTFILE}.new && mv -f /tmp/${LAYOUTFILE}.new ${XORGCONF_D}/${LAYOUTFILE}
+    m4 -D__EVENT_MOUSE_BLOCK__="
+Section \"InputDevice\"
+    Identifier      \"Event Mouse\"
+    Driver          \"evdev\"
+    Option          \"Device\"                \"${MOUSEPRFDEV}\"
+    Option          \"SendCoreEvents\"        \"true\"
+EndSection" ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
+else
+    awk '/Event\ Mouse/{c=1}c{$0 = "#" $0}{c=0}; { print }' ${XORGCONF_D}/${LAYOUTFILE} >/tmp/${LAYOUTFILE}.new && mv -f /tmp/${LAYOUTFILE}.new ${XORGCONF_D}/${LAYOUTFILE}
+    m4 -D__EVENT_MOUSE_BLOCK__='' ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
+fi
+
+exit 0

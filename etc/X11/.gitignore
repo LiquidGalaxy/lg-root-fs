@@ -1,0 +1,14 @@
+# IGNORE specific items
+X
+Xreset
+Xreset.d
+Xresources
+Xsession
+Xsession.d
+Xsession.options
+Xwrapper.config
+app-defaults
+cursors
+fonts
+rgb.txt
+xkb

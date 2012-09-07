@@ -6,9 +6,6 @@
 ConsoleKit/
 NetworkManager/
 OpenCL/
-X11
-!X11/Xsession.d
-!X11/default-display-manager
 acpi/
 adduser.conf
 alternatives/
@@ -77,6 +74,7 @@ gai.conf
 gamin/
 gconf/
 ghostscript/
+ginn/
 groff/
 group
 group-

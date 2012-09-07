@@ -4,12 +4,7 @@ Section "InputDevice"
     Option         "Device" "/dev/input/mice"
 EndSection
 
-#Section "InputDevice"
-#    Identifier      "Event Mouse"
-#    Driver          "evdev"
-#    Option          "Device"                "/dev/input/by-id/usb-Dell_Dell_USB_Mouse-event-mouse"
-#    Option          "SendCoreEvents"        "true"
-#EndSection
+__EVENT_MOUSE_BLOCK__
 
 Section "InputDevice"
     Identifier      "Quanta Touch"
