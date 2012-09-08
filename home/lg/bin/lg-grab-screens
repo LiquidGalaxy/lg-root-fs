@@ -61,7 +61,7 @@ done
 ##### Grab a Single Screen
 # _grab_screen {host} {display} {tempfile}
 function _grab_screen {
-  [ $verbose -gt 0 ] && echo "grabbing: ${1} ${2} ${3}"
+  [ "$verbose" -gt 0 ] && echo "grabbing: ${1} ${2} ${3}"
   rm -f ${3}
   ssh -fqx lg@${1} "(
 upSeconds=\$(</proc/uptime)
@@ -90,8 +90,8 @@ SANITIZE_D=${display//:}
 
 ${HOME}/bin/lg-ctl-master
 
-if [ $alldisplays -gt 0 ]; then
-  [ ! $quiet -gt 0 ] && echo "Grabbing all screens from all hosts"
+if [ "$alldisplays" -gt 0 ]; then
+  [ ! "$quiet" -gt 0 ] && echo "Grabbing all screens from all hosts"
   for target in ${LG_SCREENORDER?"LG_SCREENORDER must be set to use -a[ll].  Add it to ~/etc/shell.conf"}; do
     lg=${target//:*}
     display=${target/${lg}}
@@ -100,7 +100,7 @@ if [ $alldisplays -gt 0 ]; then
   done
 elif [ -n "$host" ]; then
   if [ -n "$display" ]; then
-    [ ! $quiet -gt 0 ] && echo "Grabbing display: ${display} from host: ${host}"
+    [ ! "$quiet" -gt 0 ] && echo "Grabbing display: ${display} from host: ${host}"
     if [[ ! "${SANITIZE_D}" =~ .\.. ]]; then
       for screen in {0..3}; do
         _grab_screen ${host} ${display}.${screen} ${tempdir}/${host}.${screen}.miff
@@ -114,7 +114,7 @@ elif [ -n "$host" ]; then
     exit 1
   fi
 elif [ -n "$display" ]; then
-  [ ! $quiet -gt 0 ] && echo "Grabbing display: ${display} from all hosts"
+  [ ! "$quiet" -gt 0 ] && echo "Grabbing display: ${display} from all hosts"
   for lg in $LG_FRAMES; do
     if [[ ! "${SANITIZE_D}" =~ .\.. ]]; then
       for screen in {0..3}; do
@@ -135,18 +135,18 @@ for job in ${PIDS[*]}; do
 done
 
 for file in ${MTAGE_FILES[*]}; do
-  if [ -s $file ]; then
+  if [ -s "$file" ]; then
     MTAGE_CHECKED=( ${MTAGE_CHECKED[*]} $file )
   fi
 done
 
-if [ ${#MTAGE_CHECKED[*]} -lt 1 ]; then
+if [ "${#MTAGE_CHECKED[*]}" -lt 1 ]; then
   echo "Nothing to montage!" >&2
   exit 1
 fi
 
 monitor=""
-if [ ! $quiet -gt 0 ]; then
+if [ ! "$quiet" -gt 0 ]; then
   echo "TEMP FILES:
   ALL:   ${MTAGE_CHECKED[*]}
   COUNT: ${#MTAGE_CHECKED[*]}

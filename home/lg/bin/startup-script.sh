@@ -34,7 +34,7 @@ fi
 
 nitrogen --set-${LG_BG_MODE} ${USE_BG_DIR}/${LG_BG_NAMEBASE}-${LG_BG_NAMEFIN}.${LG_BG_EXT} &
 
-if [[ "$FRAME_NO" -eq 0 ]]; then
+if [[ $FRAME_NO -eq 0 ]]; then
     if [ "${TOUCHSCREEN}" == "true" ]; then
         lg-log "launching kiosk browser on frame: \"${FRAME_NO}\""
         x-www-browser --temp-profile --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --app="${LG_IFACE_BASE}" &
@@ -46,7 +46,7 @@ if [[ "$FRAME_NO" -eq 0 ]]; then
     lg-log "performing one-shot lowmem kill"
     ${HOME}/bin/lg-lowmem-kill
   
-elif [[ "$FRAME_NO" -ge 1 ]]; then
+elif [[ $FRAME_NO -ge 1 ]]; then
     # slaves just wait for master
     # we need to add a method for slave instances to "notify" the master that they have started
     lg_log "slave node with frame_no: \"${FRAME_NO}\", ready"
@@ -60,7 +60,7 @@ else
     while [[ $IP_WAIT -le 9 ]]; do
         PRIMARY_IP="$(ip addr show dev eth0 primary | awk '/inet\ / { print $2}')"
         PRIMARY_MAC="$(ip link show eth0 | awk '/link\/ether\ / { print $2 }' )"
-        if [[ -z $PRIMARY_IP ]]; then
+        if [[ -z "$PRIMARY_IP" ]]; then
             let IP_WAIT+=3
             sleep 3
         else

@@ -55,7 +55,7 @@ Other CMDline options are as follows:
 }
 
 master() {
-    if [[ $FRAME_NO = 0 ]]; then
+    if [[ "${FRAME_NO}" == "0" ]]; then
         return 0
     else
         return 1

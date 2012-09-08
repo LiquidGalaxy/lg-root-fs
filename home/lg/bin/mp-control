@@ -17,7 +17,7 @@
 
 if [[ "$1" == "master" ]]; then
     shift
-    if [[ $FRAME_NO == 0 ]]; then
+    if [[ "$FRAME_NO" == 0 ]]; then
         echo "$*" | timeout 3 tee $( dirname ${MPVIDEOCTL} )/*${MPVIDEOCTL##*_} >/dev/null
     fi
 else

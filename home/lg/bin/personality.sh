@@ -68,7 +68,7 @@ echo $FRAME > /lg/frame
 # we start counting screens per-frame at 1
 #echo $DHCP_LG_SCREENS > /lg/screen
 
-if [ ${OCTET} -ne 42 ]; then
+if [ "${OCTET}" -ne 42 ]; then
     sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/hosts
     sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/hosts.squid
     sed -i -e "s:10\.42\.42\.:10.42.${OCTET}.:g" /etc/iptables.conf

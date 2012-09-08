@@ -22,7 +22,7 @@ LOAD=${2:-${XDG_PLS_DIR}/default}
 ME="`basename $0`"
 if [[ "$( id -un )" == "lg" ]]; then
     for screen in /home/lgS*; do
-        if [[ -d ${screen} ]]; then
+        if [[ -d "${screen}" ]]; then
             screennum=${screen##/home/lgS}
             logger -p local3.info -i "$0: launching $ME for my screen \"${screennum}\""
             sudo -u lgS${screennum} -H DISPLAY=:0.${screennum} ${HOME}/bin/${ME} $@ &
@@ -38,10 +38,10 @@ SANITIZE_D=${DISPLAY//:/}
 
 # figure out control socket paths
 # currently just audio or video
-if [[ $MODE == audio ]]; then
+if [[ "$MODE" == "audio" ]]; then
     thisCTL=$MPAUDIOCTL
     thatCTL=$MPVIDEOCTL
-elif [[ $MODE == video ]]; then
+elif [[ "$MODE" == "video" ]]; then
     thisCTL=$MPVIDEOCTL
     thatCTL=$MPAUDIOCTL
 else
@@ -49,7 +49,7 @@ else
     exit 1
 fi
 
-if [[ ! -p $thisCTL ]] && [[ ! -p $thatCTL ]]; then
+if [[ ! -p "$thisCTL" ]] && [[ ! -p "$thatCTL" ]]; then
     logger -p local3.err "$0: Control pipes: \"$thisCTL\", and \"$thatCTL\" fail type checking."
     echo "Control pipes: \"$thisCTL\", and \"$thatCTL\" fail type checking." >&2
     exit 1
@@ -66,7 +66,7 @@ function ctlsend() {
 RANGE_RANDPERC=60
 FLOOR_RANDPERC=3
 RANDPERC=0
-while [[ ${RANDPERC} -le ${FLOOR_RANDPERC} ]]; do
+while [[ "${RANDPERC}" -le "${FLOOR_RANDPERC}" ]]; do
     RANDPERC=$RANDOM
     let "RANDPERC %= $RANGE_RANDPERC"
 done
@@ -83,7 +83,7 @@ done
 
 # load new content and skip to a random percentage (on master, if audio)
 [ $FRAME_NO -eq 0 ] && sleep .5; ctlsend $thisCTL "loadlist $LOAD"
-if [[ $FRAME_NO == 0 ]] && [[ $MODE == audio ]]; then
+if [[ "$FRAME_NO" == "0" ]] && [[ "$MODE" == "audio" ]]; then
     ctlsend $thisCTL "set_property percent_pos $RANDPERC"
 fi
 

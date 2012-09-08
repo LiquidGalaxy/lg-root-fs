@@ -21,7 +21,7 @@ MEDIA_DIR=${1:-/media/video}
 ME="`basename $0`"
 if [[ "$( id -un )" == "lg" ]]; then
     for screen in /home/lgS*; do
-        if [[ -d ${screen} ]]; then
+        if [[ -d "${screen}" ]]; then
             screennum=${screen##/home/lgS}
             lg-log "launching $ME for my screen \"${screennum}\""
             sudo -u lgS${screennum} -H DISPLAY=:0.${screennum} ${HOME}/bin/${ME} $@ &
@@ -31,7 +31,7 @@ if [[ "$( id -un )" == "lg" ]]; then
 fi
 
 SANITIZE_D=${DISPLAY//:/}
-[ -n "${SANITIZE_D##*\.}" -a ${SANITIZE_D##*\.} -ne 0 ] && export SCREEN_NO=${SANITIZE_D##*\.}
+[ -n "${SANITIZE_D##*\.}" -a "${SANITIZE_D##*\.}" -ne 0 ] && export SCREEN_NO=${SANITIZE_D##*\.}
 
 # example: lg7 with two displays also acts as lg6
 if [[ -n "${SCREEN_NO}" ]]; then

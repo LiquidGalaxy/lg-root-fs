@@ -18,14 +18,14 @@ ME=`basename $0`
 BCSCALE=3
 
 MASTER=0
-[[ $FRAME_NO -eq 0 && "$( id -un )" == "lg" ]] && export MASTER=1
+[[ "${FRAME_NO:-1}" -eq 0 && "$( id -un )" == "lg" ]] && export MASTER=1
 
 # try a last-ditch DISPLAY
 if [[ -z "$DISPLAY" ]]; then export DISPLAY=:0; fi
 # execute for other users
 if [[ "$( id -un )" == "lg" ]]; then
     for screen in /home/lgS*; do
-        if [[ -d ${screen} ]]; then
+        if [[ -d "${screen}" ]]; then
             screennum=${screen##/home/lgS}
             #logger -p local3.info -i "$0: launching $ME for my screen \"${screennum}\""
             echo "$0: launching $ME for my screen \"${screennum}\""
@@ -37,16 +37,16 @@ fi
 
 SCREEN_NO=0
 SANITIZE_D=${DISPLAY//:/}
-[[ -n "${SANITIZE_D##*\.}" && ${SANITIZE_D##*\.} -ne 0 ]] && export SCREEN_NO=${SANITIZE_D##*\.}
+[[ -n "${SANITIZE_D##*\.}" && "${SANITIZE_D##*\.}" -ne 0 ]] && export SCREEN_NO=${SANITIZE_D##*\.}
 
 DEGROTATE=36
 DEGVIEWABLE=29
 DEGLOSSGAP=$(( ${DEGROTATE}-${DEGVIEWABLE} ))
 
-[[ -p ${MPVIDEOCTL} ]] || mkfifo ${MPVIDEOCTL} && chmod 0664 ${MPVIDEOCTL}
+[[ -p "${MPVIDEOCTL}" ]] || mkfifo ${MPVIDEOCTL} && chmod 0664 ${MPVIDEOCTL}
 
-if [[ $FRAME_NO -eq 0 ]]; then
-	[[ -p ${MPAUDIOCTL} ]] || mkfifo ${MPAUDIOCTL} && chmod 0664 ${MPAUDIOCTL}
+if [[ ${FRAME_NO} -eq 0 ]]; then
+	[[ -p "${MPAUDIOCTL}" ]] || mkfifo ${MPAUDIOCTL} && chmod 0664 ${MPAUDIOCTL}
 	MPLAYER_UDPOPT="-udp-master -udp-ip 10.42.${LG_OCTET}.255 -udp-port"
 	MPLAYER_AOOPT="-ao alsa"
 else
@@ -62,7 +62,7 @@ let FRAME_NO+=$((${VIEWFRAMES}/2))
 export `mplayer -quiet -ss 3 -frames 0 -vo null -ao null -identify "${VIDFILE}" 2>/dev/null | grep -e '\(WIDTH\|HEIGHT\)'`
 
 # exit early
-if [[ -z $ID_VIDEO_WIDTH  ]] || [[ -z $ID_VIDEO_HEIGHT ]]; then
+if [[ -z "${ID_VIDEO_WIDTH}" ]] || [[ -z "${ID_VIDEO_HEIGHT}" ]]; then
 	logger -p local3.err -s "$0: could not identify WIDTH/HEIGHT of ${VIDFILE}"
 	exit 2
 fi

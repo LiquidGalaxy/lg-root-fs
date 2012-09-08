@@ -22,7 +22,7 @@
 # ControlPath ~/.ssh/ctl/master-%r@%h:%p
 
 ver=$(ssh -V 2>&1 |& tr -cd '[:digit:]' | cut -c1,2)
-if [ $ver -lt 54 ]; then
+if [ "$ver" -lt 54 ]; then
   exit 0 # old versions of OpenSSH do not support this
 fi
 
@@ -71,7 +71,7 @@ else
   freshsocks=0
   for lg in $LG_FRAMES; do
     ssh -al $user -o ControlMaster=no -O check $lg >/dev/null 2>&1
-    if [ $? -gt 0 ]; then
+    if [ "$?" -gt 0 ]; then
       { ### clear existing procs/sockets
         pkill -f "^ssh -afMNTx.*-o ControlPersist.*${user}@${lg}$"
         rm -f ${HOME}/.ssh/ctl/master-${user}@${lg}:22
@@ -80,7 +80,7 @@ else
       ((freshsocks++))
     fi
   done
-  [ $freshsocks -gt 0 ] && sleep .5 # no sleeping in stale socks
+  [ "$freshsocks" -gt 0 ] && sleep .5 # no sleeping in stale socks
 fi
 
 exit 0

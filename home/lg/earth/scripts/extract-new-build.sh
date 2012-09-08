@@ -28,10 +28,10 @@ BUILDBIN="${XDG_DOWNLOAD_DIR}/GoogleEarthLinux.bin"
 BUILDDIR="${HOME}/earth/builds"
 
 # Test earth build binary and find version
-if [[ -r $BUILDBIN ]]; then
+if [[ -r "${BUILDBIN}" ]]; then
     BUILDVER=$( head -n 10 $BUILDBIN | awk '/^label=/ { gsub (/\"+$/,"",$NF); print $NF}' )
     # Also make it executable
-    if [[ ! -x $BUILDBIN ]]; then
+    if [[ ! -x "${BUILDBIN}" ]]; then
         chmod -v +x $BUILDBIN
     fi
 else
@@ -41,7 +41,7 @@ fi
 
 # create target from version
 echo -n "** Checking for build directories..."
-if [[ ! -d ${BUILDDIR}/${BUILDVER} ]]; then
+if [[ ! -d "${BUILDDIR}/${BUILDVER}" ]]; then
     mkdir -p ${BUILDDIR}/${BUILDVER} || exit 1
     echo -n "created..."
 else
@@ -50,7 +50,7 @@ fi
 echo "ok."
 
 # pull data files out
-if [[ -x $BUILDBIN ]]; then
+if [[ -x "${BUILDBIN}" ]]; then
     echo -n "** Selecting data files to extract (googleearth-*.tar)... "
     GRABFILES=$( $BUILDBIN --tar tf | awk '/.*googleearth(.*\.tar)?$/ {print $NF}' )
     echo "found: ${GRABFILES[*]}"
@@ -65,7 +65,7 @@ fi
 if pushd $TMPROOT; then
     echo -n "** Extracting/moving data to target: \"${BUILDDIR}/${BUILDVER}\" ..."
     for file in ${GRABFILES[*]}; do
-        if [[ -x $file ]]; then
+        if [[ -x "$file" ]]; then
             mv -vui $file ${BUILDDIR}/${BUILDVER}/
         else
             # cleanup with exit trap?

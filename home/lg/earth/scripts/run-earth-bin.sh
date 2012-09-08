@@ -26,7 +26,7 @@ ME_USER_NUM="$( id -u )"
 ME_PIDS="$( pgrep -u ${ME_USER_NUM} run-earth-bin )"
 for pid in ${ME_PIDS}; do
     # do not kill thyself or thy children
-    if [ $pid -ne $$ ] && [ $( ps -o ppid= $pid ) -ne $$ ]; then kill -9 $pid; fi
+    if [ "$pid" -ne $$ ] && [ "$( ps -o ppid= $pid )" -ne $$ ]; then kill -9 $pid; fi
 done
 
 pkill -u ${ME_USER_NUM} googleearth-bin
@@ -35,7 +35,7 @@ sleep 2
 # execute thyself as each Screen user
 if [[ "${ME_USER}" == "lg" ]]; then
     for screen in /home/lgS*; do
-        if [[ -d ${screen} ]]; then
+        if [[ -d "${screen}" ]]; then
             screennum=${screen##/home/lgS}
             lg-log "launching \"$ME\" for my screen \"${screennum}\""
             sudo -u lgS${screennum} -H ME_SCREEN=${screennum} ${SCRIPDIR}/${ME} ${@} &
@@ -46,7 +46,7 @@ fi
 
 [[ -n "${DISPLAY}" ]] || export DISPLAY=:0.0
 SANITIZE_D=${DISPLAY//:/}
-[ -n "${SANITIZE_D##*\.}" -a ${SANITIZE_D##*\.} -ne 0 ] && export SCREEN_NO=${SANITIZE_D##*\.}
+[ -n "${SANITIZE_D##*\.}" -a "${SANITIZE_D##*\.}" -ne 0 ] && export SCREEN_NO=${SANITIZE_D##*\.}
 export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating screen
 
 cd ${SCRIPDIR} || { lg-log "could not cd into script dir, \"${SCRIPDIR}\"."; exit 1; }
@@ -77,7 +77,7 @@ while true ; do
     if [[ "$DIR" == "master" ]]; then
         lg-sudo pkill googleearth-bin
     fi
-    [ -w $SPACENAVDEV ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 1
+    [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 1
 
     cd ${BUILDDIR}/${EARTH_BUILD}
     rm -f ${HOME}/.googleearth/Cache/db* # important: otherwise we get random broken tiles
@@ -97,6 +97,6 @@ while true ; do
     LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ &
     lg-proc-watch -u ${ME_USER} -b googleearth-bin -n "Google Earth" -c ${WIN_NAME} -k 20
 
-    [ -w $SPACENAVDEV ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
+    [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
     sleep 3
 done

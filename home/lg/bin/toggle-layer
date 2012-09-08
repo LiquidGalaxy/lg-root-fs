@@ -22,7 +22,7 @@ LAYERPATH="${HOME}/earth/config"
 LAYERGROUPS=( master slave )
 LAYERFILE="GECommonSettings.conf"
 
-if [[ -z $URLENCLAYER ]]; then
+if [[ -z "$URLENCLAYER" ]]; then
     echo "Please give me a URL-encoded layer name (portion after the LAST \"\\\".
     $0 Country%20Names
 " >&2

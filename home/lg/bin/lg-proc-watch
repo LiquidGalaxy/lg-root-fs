@@ -84,9 +84,9 @@ done
 while kill -0 ${bin_pid} 2>/dev/null; do
   lg-log -m "watching bin \"${monitor_bin}\""
   check_count=0
-  while [ ${check_count} -le ${kill_time} ]; do
+  while [ "${check_count}" -le "${kill_time}" ]; do
     bin_window=$( xdotool search --all --pid ${bin_pid} --name "${bin_win_name}" 2>/dev/null ) || break
-    if [ -n "${bin_window}" ] && [[ ! "$( xprop -id ${bin_window} WM_CLASS 2>/dev/null )" =~ ${win_class} ]]; then
+    if [ -n "${bin_window}" ] && [[ ! "$( xprop -id ${bin_window} WM_CLASS 2>/dev/null )" =~ "${win_class}" ]]; then
       lg-log -m "adjusting window properites for window id \"${bin_window}\" from pid \"${bin_pid}\""
       xdotool set_window --classname ${win_class} ${bin_window} 2>/dev/null && { \
         sleep ${retry_sleep}
