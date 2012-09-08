@@ -16,7 +16,7 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
-MEDIA_DIR=${1:-/media}
+MEDIA_DIR=${1:-/media/video}
 
 ME="`basename $0`"
 if [[ "$( id -un )" == "lg" ]]; then
@@ -43,7 +43,7 @@ if [[ -n "${SCREEN_NO}" ]]; then
 fi
 
 echo -n '' > ${XDG_PLS_DIR}/default.pls || exit 1
-for collection in `find ${MEDIA_DIR}/ -mindepth 1 -maxdepth 1 -type d \( ! -iname 'lost+found' ! -iname 'work' \) -printf '%f\n' | sort`; do
+for collection in `find ${MEDIA_DIR} -mindepth 1 -maxdepth 1 -regex-type posix-basic -type d -not -iregex '.*/\(lost+found\|work\|noload\)' -printf '%f\n' | sort`; do
     echo -n '' > ${XDG_PLS_DIR}/${collection}.pls || exit 1
     echo "${MEDIA_DIR}/${collection}/${FRAME_NO}.avi" >>${XDG_PLS_DIR}/default.pls
     echo "${MEDIA_DIR}/${collection}/${FRAME_NO}.avi" >>${XDG_PLS_DIR}/${collection}.pls

@@ -26,31 +26,36 @@ xsetroot -solid black &
 xset dpms 0 0 0 -dpms s blank s noexpose s 0 0 &
 xinput set-int-prop "3Dconnexion SpaceNavigator" "Device Enabled" 8 0 &
 xhost +local: &
+if [ -x "${LG_MEDIA_MNT}/backgrounds" -a -f "${LG_MEDIA_MNT}/backgrounds/lg-bg-noframe.png" ]; then
+    USE_BG_DIR="${LG_MEDIA_MNT}/backgrounds"
+else
+    USE_BG_DIR="${XDG_PICTURES_DIR}/backgrounds"
+fi
 
-if [ $FRAME_NO -eq 0 ]; then
+nitrogen --set-${LG_BG_MODE} ${USE_BG_DIR}/${LG_BG_NAMEBASE}-${LG_BG_NAMEFIN}.${LG_BG_EXT} &
+
+if [[ "$FRAME_NO" -eq 0 ]]; then
     if [ "${TOUCHSCREEN}" == "true" ]; then
-        nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-noframe.png &
-        lg-log "launching kiosk browser on second screen"
+        lg-log "launching kiosk browser on frame: \"${FRAME_NO}\""
         x-www-browser --temp-profile --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --app="${LG_IFACE_BASE}" &
-        exit
     fi
     
-    nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-${FRAME_NO}.png &
     lg-log "executing galaxy launcher"
     ${SCRIPDIR}/launch-galaxy.sh &
     sleep 60
     lg-log "performing one-shot lowmem kill"
     ${HOME}/bin/lg-lowmem-kill
   
-elif [[ $FRAME_NO -ge 1 ]]; then
-    # slaves just set desktop and wait for master
-    nitrogen --set-zoom-fill ${XDG_PICTURES_DIR}/backgrounds/lg-bg-${FRAME_NO}.png &
+elif [[ "$FRAME_NO" -ge 1 ]]; then
+    # slaves just wait for master
+    # we need to add a method for slave instances to "notify" the master that they have started
+    lg_log "slave node with frame_no: \"${FRAME_NO}\", ready"
 else
     # will wait up to 9 seconds in increments of 3
     # to get an IP
     IP_WAIT=0
     
-    nitrogen --set-tiled ${XDG_PICTURES_DIR}/backgrounds/lg-bg-noframe.png &
+    nitrogen --set-tiled ${USE_BG_DIR}/${LG_BG_BASENAME}-noframe.${LG_BG_EXT} &
       
     while [[ $IP_WAIT -le 9 ]]; do
         PRIMARY_IP="$(ip addr show dev eth0 primary | awk '/inet\ / { print $2}')"
@@ -64,7 +69,6 @@ else
     done
     
     # notify user
-#    xmessage \
     zenity --width=500 --error --title="Please Assign Personality" \
     --text="<span size=\"x-large\"> \"Personality\" assignment is <b>essential</b>.
   
