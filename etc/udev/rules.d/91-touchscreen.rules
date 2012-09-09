@@ -3,3 +3,4 @@
 
 SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", MODE="0640", GROUP="plugdev", SYMLINK+="input/quanta_touch"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", SYMLINK+="usb/quanta_touch"
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"

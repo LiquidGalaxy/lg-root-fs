@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+## RUN via sudo -H for HOME env var - criticial
+## Use this script to react to RUN actions in udev rules.
+
+. ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
+
+if [ "${UDEV_RELAUNCH}" == "true" ]; then
+    if [ -n "$( pgrep X )" ]; then
+        lg-log "relaunch kicked-off by udev activity"
+        lg-relaunch 2>>/tmp/${0}.err >>/tmp/${0}.log
+    fi
+else
+    lg-log "NOT configured to relaunch upon udev activity"
+fi
+
+exit 0
