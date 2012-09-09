@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+. ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
+
 echo "==Head Node=="
 echo
 hostname
@@ -25,16 +28,16 @@ echo
 echo "==Display Nodes=="
 echo
 echo "====Disk Usage===="
-${HOME}/bin/lg-run "df {/,/isodevice,/var/spool/squid3}; printf %21s USED INODES; echo; df -i {/,/isodevice,/var/spool/squid3} | tail -n +2" 2>/dev/null
+lg-run "df {/,/isodevice,/var/spool/squid3}; printf %21s USED INODES; echo; df -i {/,/isodevice,/var/spool/squid3} | tail -n +2" 2>/dev/null
 echo
 echo "====Processes===="
-${HOME}/bin/lg-run "
+lg-run "
 free -m;
 echo;
 ps -o user,pid,%cpu,%mem,vsize,start,time,stat,comm -C googleearth-bin,lxdm-binary,lightdm,screensaver.py,squid3,squidmon.sh,lighttpd
 " 2>/dev/null
 echo
 echo "====Thermal===="
-${HOME}/bin/lg-run "nvidia-settings -c :0 --query 0/GPUCoreTemp | grep :0 | sed -e 's/^[[:space:]]*//'" 2>/dev/null
+lg-run "nvidia-settings -c :0 --query 0/GPUCoreTemp | grep :0 | sed -e 's/^[[:space:]]*//'" 2>/dev/null
 
 exit 0

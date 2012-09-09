@@ -72,7 +72,7 @@ function _grab_frame {
 
 ##### Logic Begins
 
-${HOME}/bin/lg-ctl-master
+lg-ctl-master
 
 rm -f ${tempdir}/lg-anim.*.gif
 

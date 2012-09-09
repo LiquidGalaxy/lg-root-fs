@@ -61,6 +61,6 @@ if test "$frame"; then
   echo "${frame}:"
   ssh -x root@$frame "$RELAUNCH_CMD"
 else
-  ${HOME}/bin/lg-sudo-bg "$RELAUNCH_CMD"
+  lg-sudo-bg "$RELAUNCH_CMD"
 fi
 

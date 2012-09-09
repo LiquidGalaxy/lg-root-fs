@@ -44,7 +44,7 @@ if [[ $FRAME_NO -eq 0 ]]; then
     ${SCRIPDIR}/launch-galaxy.sh &
     sleep 60
     lg-log "performing one-shot lowmem kill"
-    ${HOME}/bin/lg-lowmem-kill
+    lg-lowmem-kill
   
 elif [[ $FRAME_NO -ge 1 ]]; then
     # slaves just wait for master

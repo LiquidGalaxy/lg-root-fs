@@ -19,7 +19,7 @@
 tempdir=${HOME}/tmp
 resize=600
 
-${HOME}/bin/lg-ctl-master
+lg-ctl-master
 
 for target in $LG_SCREENORDER; do
   lg=${target//:*}

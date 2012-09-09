@@ -88,7 +88,7 @@ xwd -display ${2} -root -silent | composite -gravity north -geometry +0+3 miff:/
 
 SANITIZE_D=${display//:}
 
-${HOME}/bin/lg-ctl-master
+lg-ctl-master
 
 if [ "$alldisplays" -gt 0 ]; then
   [ ! "$quiet" -gt 0 ] && echo "Grabbing all screens from all hosts"
