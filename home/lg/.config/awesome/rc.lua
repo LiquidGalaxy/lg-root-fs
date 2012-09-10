@@ -10,6 +10,31 @@ require("naughty")
 -- Load Debian menu entries
 require("debian.menu")
 
+-- {{{ Error handling
+-- Check if awesome encountered an error during startup and fell back to
+-- another config (This code will only ever execute for the fallback config)
+if awesome.startup_errors then
+    naughty.notify({ preset = naughty.config.presets.critical,
+                     title = "Oops, there were errors during startup!",
+                     text = awesome.startup_errors })
+end
+
+-- Handle runtime errors after startup
+do
+    local in_error = false
+    awesome.add_signal("debug::error", function (err)
+        -- Make sure we don't go into an endless error loop
+        if in_error then return end
+        in_error = true
+
+        naughty.notify({ preset = naughty.config.presets.critical,
+                         title = "Oops, an error happened!",
+                         text = err })
+        in_error = false
+    end)
+end
+-- }}}
+
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 theme_path = os.getenv("HOME") .. "/.themes/awesome"
@@ -28,6 +53,29 @@ editor_cmd = terminal .. " -e " .. editor
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
+
+-- LG variables
+if os.getenv("LG_RANDR") == "normal" then
+    lg_screen_width = os.getenv("LG_SCREEN_WIDTH")
+    lg_screen_height = os.getenv("LG_SCREEN_HEIGHT")
+else
+    lg_screen_width = os.getenv("LG_SCREEN_HEIGHT")
+    lg_screen_height = os.getenv("LG_SCREEN_WIDTH")
+end
+lg_wm_gap = os.getenv("LG_WM_GAP")
+lg_toolbar_height = os.getenv("LG_TOOLBAR_HEIGHT")
+-- calculate GE window positions for each instance
+lg_touchscreen = os.getenv("TOUCHSCREEN")
+ge_win_x = {}
+for ge_instance = 0,3 do
+    if lg_touchscreen == "true" then
+        ge_win_x[ge_instance] = ((lg_screen_height-lg_screen_width)/2)*ge_instance
+    else
+        ge_win_x[ge_instance] = lg_screen_width*ge_instance
+    end
+    -- debugging
+    -- io.stderr:write( "ts: " .. lg_touchscreen .. " ge_win_x item: " .. ge_instance .. " gets value: " .. ge_win_x[ge_instance] .. "\n" )
+end
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -60,7 +108,7 @@ end
 -- Create a laucher widget and a main menu
 myawesomemenu = {
    { "manual", terminal .. " -e man awesome" },
-   { "edit config", editor_cmd .. " " .. awful.util.getdir("config") .. "/rc.lua" },
+   { "edit config", editor_cmd .. " " .. awesome.conffile },
    { "restart", awesome.restart },
    { "quit", awesome.quit }
 }
@@ -147,29 +195,27 @@ for s = 1, screen.count() do
                                           end, mytasklist.buttons)
 
     -- Create the wibox
-   if s == 1 then
-    mywibox[s] = awful.wibox({ position = "top", screen = s })
+--    mywibox[s] = awful.wibox({ position = "top", screen = s })
     -- Add widgets to the wibox - order matters
-    mywibox[s].widgets = {
-        {
-           -- mylauncher,
-            mytaglist[s],
-            mypromptbox[s],
-            layout = awful.widget.layout.horizontal.leftright
-        },
-        --mylayoutbox[s],
-        --mytextclock,
-        --s == 1 and mysystray or nil,
-        --mytasklist[s],
-        layout = awful.widget.layout.horizontal.rightleft
-    }
-   end
+--    mywibox[s].widgets = {
+--        {
+--            mylauncher,
+--            mytaglist[s],
+--            mypromptbox[s],
+--            layout = awful.widget.layout.horizontal.leftright
+--        },
+--        mylayoutbox[s],
+--        mytextclock,
+--        s == 1 and mysystray or nil,
+--        mytasklist[s],
+--        layout = awful.widget.layout.horizontal.rightleft
+--    }
 end
 -- }}}
 
 -- {{{ Mouse bindings
 root.buttons(awful.util.table.join(
-    --awful.button({ }, 3, function () mymainmenu:toggle() end),
+--    awful.button({ }, 3, function () mymainmenu:toggle() end),
     awful.button({ }, 4, awful.tag.viewnext),
     awful.button({ }, 5, awful.tag.viewprev)
 ))
@@ -306,31 +352,63 @@ root.keys(globalkeys)
 
 -- {{{ Rules
 awful.rules.rules = {
-    -- All clients will match this rule.
-    { rule = { },
-      properties = { border_width = beautiful.border_width,
-                     border_color = beautiful.border_normal,
-                     focus = true,
-                     keys = clientkeys,
-                     buttons = clientbuttons } },
     { rule = { class = "MPlayer" },
       properties = { floating = true } },
     { rule = { class = "pinentry" },
       properties = { floating = true } },
-    { rule = { class = "gimp" },
-      properties = { floating = true } },
-    { rule = { class = 'Chromium-browser' },
-      properties = { tag = tags[2][1],
+    { rule = { class = 'Chromium-browser', instance = 'lg1' },
+      properties = { tag = tags[1][1],
                      floating = true,
-                     width = 960,
-                     height = 1160,
+                     width = 480,
+                     height = 1080,
+                     border_width = 0 }, callback = function(c) c:geometry({x=0, y=lg_screen_height+lg_wm_gap}) end },
+    { rule = { class = 'Googleearth-bin', instance = 'ge-ts' },
+      properties = { tag = tags[1][1],
+                     floating = true,
+                     width = 1440,
+                     height = 1080+lg_toolbar_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=480, y=lg_screen_height+lg_wm_gap-lg_toolbar_height}) end },
+    { rule = { class = 'Googleearth-bin', instance = 'ge-lgS0' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height+lg_toolbar_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=ge_win_x[0], y=0-lg_toolbar_height}) end },
+    { rule = { class = 'Googleearth-bin', instance = 'ge-lgS1' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height+lg_toolbar_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=ge_win_x[1], y=0-lg_toolbar_height}) end },
+    { rule = { class = 'Googleearth-bin', instance = 'ge-lgS2' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height+lg_toolbar_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=ge_win_x[2], y=0-lg_toolbar_height}) end },
+    { rule = { class = 'Googleearth-bin', instance = 'ge-lgS3' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height+lg_toolbar_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=ge_win_x[3], y=0-lg_toolbar_height}) end },
+    { rule = { class = 'Chromium-browser', instance = 'aquarium-lgS0' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height,
+                     border_width = 0 }, callback = function(c) c:geometry({y=0}) end },
+    { rule = { class = 'Chromium-browser', instance = 'aquarium-lgS1' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=lg_screen_width*2, y=0}) end },
+    { rule = { class = 'MPlayer', instance = 'MPlayerTour' },
+      properties = { floating = true,
+                     ontop = true,
                      border_width = 0 } },
-    { rule = { class = 'Googleearth-bin' },
-      properties = { tag = tags[2][1],
-                     floating = true,
-                     width = 960,
-                     height = 1100,
-                     border_width = 0 }, callback = function(c) c:geometry({x=960, y=-20}) end },
+    -- All clients will match this rule.
+    { rule = { },
+      properties = { border_width = 0,
+                     border_color = beautiful.border_normal,
+                     focus = true,
+                     keys = clientkeys,
+                     buttons = clientbuttons } },
     -- Set Firefox to always map on tags number 2 of screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
@@ -354,7 +432,7 @@ client.add_signal("manage", function (c, startup)
     if not startup then
         -- Set the windows at the slave,
         -- i.e. put it at the end of others instead of setting it master.
-        -- awful.client.setslave(c)
+        awful.client.setslave(c)
 
         -- Put windows in a smart way, only if they does not set an initial position.
         if not c.size_hints.user_position and not c.size_hints.program_position then
@@ -368,9 +446,9 @@ client.add_signal("focus", function(c) c.border_color = beautiful.border_focus e
 client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 
 -- launch Liquid Galaxy stuff on each screen
-for s = 1, screen.count() do
-   galaxy_start = "DISPLAY=:0." .. s-1 .. " " .. os.getenv("HOME") .. "/bin/startup-script.sh 2>>/tmp/err 1>>/tmp/out"
-   awful.util.spawn_with_shell(galaxy_start)
-end
+--for s = 1, screen.count() do
+--   galaxy_start = "DISPLAY=:0." .. s-1 .. " " .. os.getenv("HOME") .. "/bin/startup-script.sh 2>>/tmp/err 1>>/tmp/out"
+ --  awful.util.spawn_with_shell(galaxy_start)
+--end
 
 -- }}}
