@@ -14,6 +14,7 @@
 # limitations under the License.
 
 . ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
 
 list=${TOUCHSCRQRF:-/var/www/queries.txt}
 out=${EARTH_QUERY}
@@ -21,4 +22,6 @@ out=${EARTH_QUERY}
 # if you'd like to tour the moon or mars, replace "earth" in this awk cmd
 query=$( awk -F'@' '/^earth/ {print $NF}' $list | shuf -n 1 )
 echo q=$query
-echo $query > $out
+if [ "${LG_SCREENSAVER}" == "true" ]; then
+    echo $query > $out
+fi

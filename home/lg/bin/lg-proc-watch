@@ -82,7 +82,7 @@ while [ ${pid_find_fails} -lt ${pid_find_max} ]; do
 done
 
 while kill -0 ${bin_pid} 2>/dev/null; do
-  lg-log -m "watching bin \"${monitor_bin}\""
+  #lg-log -m "watching bin \"${monitor_bin}\""
   check_count=0
   while [ "${check_count}" -le "${kill_time}" ]; do
     bin_window=$( xdotool search --all --pid ${bin_pid} --name "${bin_win_name}" 2>/dev/null ) || break
