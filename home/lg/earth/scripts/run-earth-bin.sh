@@ -33,7 +33,7 @@ pkill -u ${ME_USER_NUM} googleearth-bin
 sleep 2
 
 # execute thyself as each Screen user
-if [[ "${ME_USER}" == "lg" ]]; then
+if [[ "${ME_USER}" == "lg" && ${screen##/home/lgS} < ${LG_SCREEN_COUNT} ]]; then
     for screen in /home/lgS*; do
         if [[ -d "${screen}" ]]; then
             screennum=${screen##/home/lgS}

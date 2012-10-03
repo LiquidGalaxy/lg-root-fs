@@ -66,6 +66,7 @@ lg_wm_gap = os.getenv("LG_WM_GAP")
 lg_toolbar_height = os.getenv("LG_TOOLBAR_HEIGHT")
 -- calculate GE window positions for each instance
 lg_touchscreen = os.getenv("TOUCHSCREEN")
+lg_iface_width = os.getenv("LG_IFACE_WIDTH")
 ge_win_x = {}
 for ge_instance = 0,3 do
     if lg_touchscreen == "true" then
@@ -359,7 +360,7 @@ awful.rules.rules = {
     { rule = { class = 'Chromium-browser', instance = 'lg1' },
       properties = { tag = tags[1][1],
                      floating = true,
-                     width = 480,
+                     width = lg_iface_width,
                      height = 1080,
                      border_width = 0 }, callback = function(c) c:geometry({x=0, y=lg_screen_height+lg_wm_gap}) end },
     { rule = { class = 'Googleearth-bin', instance = 'ge-ts' },

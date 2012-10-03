@@ -10,3 +10,5 @@ lg          ALL=(LGSCR) NOPASSWD: LAUNCHERS
 www-data ALL=(lg) NOPASSWD: /home/lg/bin/lg-relaunch
 www-data ALL=(lg) NOPASSWD: /home/lg/bin/lg-run-bg
 www-data ALL=(lg) NOPASSWD: /home/lg/bin/mp-control
+
+lg       ALL=(root) NOPASSWD: /usr/bin/nvidia-smi -pm 1
