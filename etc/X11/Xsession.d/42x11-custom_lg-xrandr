@@ -9,17 +9,20 @@ LG_SCREEN_WIDTH=${DHCP_SCREEN_WIDTH:-1920}
 LG_SCREEN_HEIGHT=${DHCP_SCREEN_HEIGHT:-1080}
 
 { date; echo "NVIDIA=${NVIDIA_VERSION}" ; } >${LOGFILE}
+# collect connected displays, sort and count them
 # we are assuming we want "HDMI" to be before "DVI", hence the sort
 RANDR_OUTPUTS="$( xrandr -q | awk '/^[A-Z].+-[0-9]\ connected\ / { print $1 }' | sort -r )"
 OUTPUT_COUNT="$( echo ${RANDR_OUTPUTS} | wc -w )"
 MY_OUTPUT=1
-RANDR_ORDER="--right-of"
+# lay out displays up from left to right [remember the sort]
+RANDR_ORDER="--left-of"
 # re-organize frame numbers
 if [ ${FRAME_NO} -gt 4 ]; then
-    FRAME_NO=$( echo "$FRAME_NO-8" | bc )
+    FRAME_NO=$( echo "${FRAME_NO}-8" | bc )
     # use FRAME_NO absolute values (like 2 instead of -2)
-    FRAME_NO=$(( ${FRAME_NO}+4 ))
-    RANDR_ORDER="--left-of"
+    FRAME_NO=$( echo "${FRAME_NO}+4" | bc )
+    # lay out displays from right to left for frame numbers greater than 1/2 of the default total
+    RANDR_ORDER="--right-of"
 fi
 
 for output in ${RANDR_OUTPUTS}; do
@@ -27,21 +30,19 @@ for output in ${RANDR_OUTPUTS}; do
         if [ "${MY_OUTPUT}" -eq "${OUTPUT_COUNT}" ] || [ "${MY_OUTPUT}" -eq "$(( ${OUTPUT_COUNT}-1 ))" ]; then
             RANDR_PREFIX=""
         else
-            RANDR_PREFIX="$output"
+            RANDR_PREFIX="${output}"
         fi
         # place the first of the span of other screens at 0x0
         USE_RANDR_ORDER="--pos 0x0"
+        PREV_SCREEN="${output}"
     elif [ "${MY_OUTPUT}" -lt "${OUTPUT_COUNT}" ]; then
-        RANDR_PREFIX="$output"
-        USE_RANDR_ORDER="${RANDR_ORDER}"
+        RANDR_PREFIX="${output}"
+        USE_RANDR_ORDER="${RANDR_ORDER} ${PREV_SCREEN}"
+        PREV_SCREEN="${output}"
     else
         RANDR_PREFIX=""
-        if [ "${FRAME_NO}" -eq 0 ]; then
-            # place the touchscreen centered BELOW the span of other screens
-            USE_RANDR_ORDER="--pos $(( ((${LG_SCREEN_HEIGHT}*(${OUTPUT_COUNT}-1))/2) - (${LG_SCREEN_WIDTH}/2) ))x$(( ${LG_SCREEN_WIDTH}+60 ))" 
-        else
-            USE_RANDR_ORDER="${RANDR_ORDER}"
-        fi
+        USE_RANDR_ORDER="${RANDR_ORDER} ${PREV_SCREEN}"
+        PREV_SCREEN="${output}"
     fi
     if [ "${FRAME_NO}" -eq 0 ] && [ "${MY_OUTPUT}" -eq "${OUTPUT_COUNT}" ]; then
         logger -p local3.info "$0: adding xrandr options for output: \"${MY_OUTPUT}\" of \"${OUTPUT_COUNT}\" on frame: \"${FRAME_NO}\""

@@ -67,10 +67,11 @@ lg_toolbar_height = os.getenv("LG_TOOLBAR_HEIGHT")
 -- calculate GE window positions for each instance
 lg_touchscreen = os.getenv("TOUCHSCREEN")
 lg_iface_width = os.getenv("LG_IFACE_WIDTH")
+lg_iface_height = os.getenv("LG_IFACE_HEIGHT")
 ge_win_x = {}
 for ge_instance = 0,3 do
     if lg_touchscreen == "true" then
-        ge_win_x[ge_instance] = ((lg_screen_height-lg_screen_width)/2)*ge_instance
+        ge_win_x[ge_instance] = 1920+(lg_screen_width*(ge_instance-1))
     else
         ge_win_x[ge_instance] = lg_screen_width*ge_instance
     end
@@ -362,13 +363,13 @@ awful.rules.rules = {
                      floating = true,
                      width = lg_iface_width,
                      height = 1080,
-                     border_width = 0 }, callback = function(c) c:geometry({x=0, y=lg_screen_height+lg_wm_gap}) end },
+                     border_width = 0 }, callback = function(c) c:geometry({x=0, y=0-lg_toolbar_height}) end },
     { rule = { class = 'Googleearth-bin', instance = 'ge-ts' },
       properties = { tag = tags[1][1],
                      floating = true,
-                     width = 1440,
+                     width = 1920-lg_iface_width,
                      height = 1080+lg_toolbar_height,
-                     border_width = 0 }, callback = function(c) c:geometry({x=480, y=lg_screen_height+lg_wm_gap-lg_toolbar_height}) end },
+                     border_width = 0 }, callback = function(c) c:geometry({x=lg_iface_width, y=0-lg_toolbar_height}) end },
     { rule = { class = 'Googleearth-bin', instance = 'ge-lgS0' },
       properties = { floating = true,
                      width = lg_screen_width,
