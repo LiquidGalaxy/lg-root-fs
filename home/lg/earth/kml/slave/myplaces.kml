@@ -35,6 +35,16 @@
 					<refreshInterval>1</refreshInterval>
 				</Link>
 			</NetworkLink>
+			<NetworkLink>
+				<name>Street View Force</name>
+				<Link>
+					<href>##LG_IFACE_BASE##/cgi-bin/sv_force.py</href>
+					<refreshMode>onInterval</refreshMode>
+					<refreshInterval>1</refreshInterval>
+					<viewRefreshMode>onStop</viewRefreshMode>
+					<viewFormat>place=[cameraLon],[cameraLat],[cameraAlt],[lookatRange],[lookatTilt],[lookatHeading]</viewFormat>
+				</Link>
+			</NetworkLink>
 		</Folder>
 	</Folder>
 </Document>
