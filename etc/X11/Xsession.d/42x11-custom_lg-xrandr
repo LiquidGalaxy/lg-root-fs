@@ -15,15 +15,15 @@ RANDR_OUTPUTS="$( xrandr -q | awk '/^[A-Z].+-[0-9]\ connected\ / { print $1 }' |
 OUTPUT_COUNT="$( echo ${RANDR_OUTPUTS} | wc -w )"
 MY_OUTPUT=1
 # lay out displays up from left to right [remember the sort]
-RANDR_ORDER="--left-of"
+RANDR_ORDER="--right-of"
 # re-organize frame numbers
-if [ ${FRAME_NO} -gt 4 ]; then
-    FRAME_NO=$( echo "${FRAME_NO}-8" | bc )
-    # use FRAME_NO absolute values (like 2 instead of -2)
-    FRAME_NO=$( echo "${FRAME_NO}+4" | bc )
-    # lay out displays from right to left for frame numbers greater than 1/2 of the default total
-    RANDR_ORDER="--right-of"
-fi
+#if [ ${FRAME_NO} -gt 4 ]; then
+#    FRAME_NO=$( echo "${FRAME_NO}-8" | bc )
+#    # use FRAME_NO absolute values (like 2 instead of -2)
+#    FRAME_NO=$( echo "${FRAME_NO}+4" | bc )
+#    # lay out displays from right to left for frame numbers greater than 1/2 of the default total
+#    RANDR_ORDER="--right-of"
+#fi
 
 for output in ${RANDR_OUTPUTS}; do
     if [ "${MY_OUTPUT}" -eq 1 ]; then

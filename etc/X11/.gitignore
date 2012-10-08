@@ -3,8 +3,8 @@ X
 Xreset
 Xreset.d
 Xresources
-Xsession
-Xsession.d
+#Xsession
+#Xsession.d
 Xsession.options
 Xwrapper.config
 app-defaults
