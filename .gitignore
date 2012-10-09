@@ -10,6 +10,11 @@
 !README
 
 # BLACKLIST even with whitelisted items
+*~
+*.swp
+*.tar.gz
+*.rpm
+*.deb
 lib/
 var/
 proc/
