@@ -42,7 +42,8 @@
 					<refreshMode>onInterval</refreshMode>
 					<refreshInterval>1</refreshInterval>
 					<viewRefreshMode>onStop</viewRefreshMode>
-					<viewFormat>place=[cameraLon],[cameraLat],[cameraAlt],[lookatRange],[lookatTilt],[lookatHeading]</viewFormat>
+					<viewRefreshTime>1</viewRefreshTime>
+					<viewFormat>place=[cameraLon],[cameraLat],[cameraAlt],[lookatRange],[lookatTilt],[lookatHeading],[lookatTerrainAlt]</viewFormat>
 				</Link>
 			</NetworkLink>
 		</Folder>
