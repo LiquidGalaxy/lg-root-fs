@@ -18,10 +18,21 @@
 
 list=${TOUCHSCRQRF:-/var/www/queries.txt}
 out=${EARTH_QUERY}
+# use redirection to get a bare number
+count=$( wc -l < $list )
+previous_file="/tmp/tour-previous.tmp"
+previous=$( cat ${previous_file} 2>/dev/null )
 
-# if you'd like to tour the moon or mars, replace "earth" in this awk cmd
-query=$( awk -F'@' '/^earth/ {print $NF}' $list | shuf -n 1 )
-echo q=$query
-if [ "${LG_SCREENSAVER}" == "true" ]; then
-    echo $query > $out
+# if reached last entry, start over
+if [ ${previous:-1} -ge ${count} ]; then
+    previous=0
+    echo -n "${previous}" >${previous_file}
 fi
+
+new_query=$(( ${previous:-1}+1 ))
+# if you'd like to tour the moon or mars, replace "earth" in this awk cmd
+query=$( awk -F'@' "/^earth/ {if (NR==${new_query}) print \$NF}" $list )
+if [ "${LG_SCREENSAVER}" == "true" ]; then
+    echo "${query}" | tee ${out}
+fi
+echo ${new_query} >${previous_file}
