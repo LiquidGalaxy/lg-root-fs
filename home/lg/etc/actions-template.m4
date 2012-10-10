@@ -5,7 +5,7 @@
 input_streams:
     -
         name: input
-        port: 45677
+        port: __INPUT_PORT__
         addr: 0.0.0.0
 
 # Each output has a name, an address, and a port, and sends UDP traffic on that
@@ -16,8 +16,8 @@ input_streams:
 output_streams:
     -
         name: output
-        host: 10.42.42.255
-        port: 45678
+        host: 10.42.__LG_OCTET__.255
+        port: __EARTH_PORT__
         broadcast: true
 
 # Linkages connect inputs and outputs, optionally including transformations.
