@@ -362,7 +362,7 @@ awful.rules.rules = {
       properties = { tag = tags[1][1],
                      floating = true,
                      width = lg_iface_width,
-                     height = 1080,
+                     height = 1080+lg_toolbar_height,
                      border_width = 0 }, callback = function(c) c:geometry({x=0, y=0-lg_toolbar_height}) end },
     { rule = { class = 'Googleearth-bin', instance = 'ge-ts' },
       properties = { tag = tags[1][1],
