@@ -21,11 +21,23 @@ if [[ "${FRAME_NO}" == "0" ]]; then
     pkill -f viewsyncrelay.pl 
     pkill -u $(id -u) socat
     sleep 1
-    m4 \
-        -D__LG_OCTET__=${LG_OCTET} \
-        -D__EARTH_PORT__=${EARTH_PORT} \
-        -D__INPUT_PORT__=$((${EARTH_PORT}-1)) \
-        ${SHCONFDIR}/actions-template.m4 >${SHCONFDIR}/actions.yml
-    [[ "${VSYNC_RELAY}" == "true" ]] && viewsyncrelay.pl ${SHCONFDIR}/actions.yml &
+
+    ### viewsyncrelay setup
+    if [[ "${VSYNC_RELAY}" == "true" ]]; then
+        m4 \
+            -D__LG_OCTET__=${LG_OCTET} \
+            -D__EARTH_PORT__=${EARTH_PORT} \
+            -D__INPUT_PORT__=$((${EARTH_PORT}-1)) \
+            ${SHCONFDIR}/actions-template.m4 >${SHCONFDIR}/actions.yml
+
+        for FILE in ${HOME}/etc/actions.d/*.yml; do
+            cat $FILE >> ${SHCONFDIR}/actions.yml
+        done
+
+        viewsyncrelay.pl ${SHCONFDIR}/actions.yml &
+    fi
+    ###
+
+
     lg-run-bg ${SCRIPDIR}/run-earth-bin.sh
 fi

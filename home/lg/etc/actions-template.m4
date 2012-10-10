@@ -46,12 +46,3 @@ linkages:
 #       initially_disabled key is sufficient to make it disabled; the value of
 #       the key doesn't matter.
 actions:
-    -
-        name: play triosonata
-        input: ALL
-        action: mplayer -really-quiet -fs -zoom p1.flv
-        exit_action: mp-control 
-        repeat: DEFAULT
-        constraints:
-            latitude: '(10.0, 20.0]'
-            longitude: '[10.0, 20.0]'
