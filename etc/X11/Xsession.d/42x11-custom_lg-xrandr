@@ -1,4 +1,9 @@
 # POSIX SHELL compliance desired(required?)
+###
+# this script is where your physical arrangement and your
+# display viewports come together
+# THIS EXAMPLE ASSUMES THE "TURNKEY" LG SETUP
+###
 # includes and vars
 if [ -r "/lg/personavars.txt" ]; then . /lg/personavars.txt; fi
 FRAME_NO="$( cat /lg/frame 2>/dev/null )"
@@ -14,16 +19,14 @@ LG_SCREEN_HEIGHT=${DHCP_SCREEN_HEIGHT:-1080}
 RANDR_OUTPUTS="$( xrandr -q | awk '/^[A-Z].+-[0-9]\ connected\ / { print $1 }' | sort -r )"
 OUTPUT_COUNT="$( echo ${RANDR_OUTPUTS} | wc -w )"
 MY_OUTPUT=1
-# lay out displays up from left to right [remember the sort]
-RANDR_ORDER="--right-of"
-# re-organize frame numbers
-#if [ ${FRAME_NO} -gt 4 ]; then
-#    FRAME_NO=$( echo "${FRAME_NO}-8" | bc )
-#    # use FRAME_NO absolute values (like 2 instead of -2)
-#    FRAME_NO=$( echo "${FRAME_NO}+4" | bc )
-#    # lay out displays from right to left for frame numbers greater than 1/2 of the default total
-#    RANDR_ORDER="--right-of"
-#fi
+# lay out VIEWPORTS of each PHYSICAL connector [remember the sort]
+if [ "${FRAME_NO}" -gt 4 ]; then
+    RANDR_ORDER="--left-of"
+elif [ "${FRAME_NO}" -gt 0 ]; then
+    RANDR_ORDER="--right-of"
+else
+    RANDR_ORDER="--left-of"
+fi
 
 for output in ${RANDR_OUTPUTS}; do
     if [ "${MY_OUTPUT}" -eq 1 ]; then
