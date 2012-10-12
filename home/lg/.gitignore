@@ -5,6 +5,7 @@
 .bash_history
 .rpmdb/
 .selected_editor
+.themes/
 .viminfo
 bin/led-enable
 earth/builds/latest

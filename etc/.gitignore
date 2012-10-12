@@ -70,6 +70,7 @@ esound/
 fonts/
 foomatic/
 fstab
+fuse.conf
 gai.conf
 gamin/
 gconf/
@@ -117,6 +118,7 @@ locale.alias
 locale.nopurge
 localtime
 logcheck/
+logrotate.d/
 login.defs
 lsb-base-logging.sh
 lsb-release
