@@ -82,7 +82,7 @@ sub parse_constraints {
     my $cf = shift;
     my $limits;
 
-    for my $constraint (keys %$cf) {
+    for my $constraint (grep { ! /planet/ } (keys %$cf)) {
         my $val = $cf->{$constraint};
         $val =~ s/\s+//g;
 
@@ -95,6 +95,7 @@ sub parse_constraints {
         };
         $limits->{$constraint}{max} = $+{max} * 1.0 if exists $+{max};
     }
+    $limits->{planet} = $cf->{planet} if exists $cf->{planet};
     return $limits;
 }
 
@@ -118,7 +119,7 @@ sub match_constraints {
                     ($limits->{$field}{min_inc} && $val == $limits->{$field}{min})
                 ) {
                     # Yay! this constraint passed
-                    print "Action $name passed check for value $field\n" if $verbose_act > 2;
+                    print "Action $name passed check for \"$field\"\n" if $verbose_act > 2;
                 }
                 else {
                     print "Action $name violated condition on $field (value was $val)\n" if $verbose_act > 2;
@@ -130,6 +131,18 @@ sub match_constraints {
         } grep { $_ ne 'planet' } @fields;
                 # ^^ these constraints are only designed to handle numeric
                 # values, so don't bother with a non-numeric field
+
+        # For now, assume you'll only ever want an action to work for one
+        # single planet, so there's no support for sets of planets
+        $msg_vals{planet} = 'earth' if (! defined $msg_vals{planet});
+        if (exists $limits->{planet} && exists $msg_vals{planet} && $msg_vals{planet} eq lc($limits->{planet})) {
+            print "Action $name passed check for \"planet\"\n" if $verbose_act > 2;
+        }
+        else {
+            print "Action $name violated condition on planet (value was $msg_vals{planet})\n" if $verbose_act > 2;
+            $do_action = 0;
+            die;
+        }
     };
     return $do_action;
 }
@@ -162,19 +175,22 @@ sub run_action {
         
         my $do_action = 1;
 
-        if ($run_next && match_constraints($name, $msg, $limits)) {
+        my $matches = 0;
+        $matches = match_constraints($name, $msg, $limits);
+        if ($run_next && $matches) {
             $run_next = 0 unless $repeat eq 'ALL';
             print "Action $name ($config->{action}) is going to be run now (repeat mode: $repeat)\n" if $verbose_act;
             child_action $config->{action};
             $running = 1;
         }
         else {
-            if ($running && exists $config->{exit_action}) {
-                print "Running exit_action for $name: $config->{exit_action}\n" if $verbose_act > 0;
+            if ($running && !$matches && exists $config->{exit_action}) {
+                print "Running exit_action for $name: $config->{exit_action}\n"
+                    if ($verbose_act > 0 && exists($config->{exit_action}) && defined($config->{exit_action}));
                 child_action $config->{exit_action};
             }
             $running = 0;
-            if ($repeat ne 'ONCE' && $repeat ne 'RESET') {
+            if ($repeat ne 'ONCE' && $repeat ne 'RESET' && !$matches) {
                 print "Resetting action $name because of failed test on field\n"
                     if ($run_next == 0 and $verbose_act > 0);
                 $run_next = 1;
@@ -353,7 +369,12 @@ sub load_config_file {
 
     map {
         my @a = @{$config->{$_}};
-        @a = (@{$config->{$_}}, @{$file->{$_}}) if exists $file->{$_};
+        if (defined $file->{$_} && exists $file->{$_}) {
+            @a = (@{$config->{$_}}, @{$file->{$_}})
+        }
+        else {
+            @a = @{$config->{$_}};
+        }
         $config->{$_} = \@a;
     } qw/input_streams output_streams transformations linkages actions/;
 
@@ -363,18 +384,20 @@ sub load_config_file {
     # Also, disable all but the first action, unless otherwise specified
 
     my @actions = @{$config->{actions}};
-    my $prev_reset = $actions[$#actions]->{constraints};
-    my $first = 1;
-    map {
-        if ($_->{repeat} eq 'RESET' and ! exists $_->{reset_constraints}) {
-            $_->{reset_constraints} = $prev_reset;
-        }
-        if (!$first) {
-            $_->{initially_disabled} = 1 unless exists $_->{initially_disabled};
-        }
-        $first = 0;
-        $prev_reset = $_->{constraints};
-    } @{$config->{actions}};
+    if ($#actions > -1) {
+        my $prev_reset = $actions[$#actions]->{constraints};
+        my $first = 1;
+        map {
+            if ($_->{repeat} eq 'RESET' and ! exists $_->{reset_constraints}) {
+                $_->{reset_constraints} = $prev_reset;
+            }
+            if (!$first) {
+                $_->{initially_disabled} = 1 unless exists $_->{initially_disabled};
+            }
+            $first = 0;
+            $prev_reset = $_->{constraints};
+        } @{$config->{actions}};
+    }
 }
 
 sub load_config {
@@ -398,7 +421,7 @@ sub load_config {
         if (-d $file) {
             opendir(my $dh, $file) || die "Can't opendir $file: $!";
             map {
-                load_config_file \%config_values, $_;
+                load_config_file \%config_values, "$file/$_";
             } grep { (! /^\./) && -f "$file/$_" } readdir($dh);
             closedir $dh;
         }
