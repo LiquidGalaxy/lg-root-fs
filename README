@@ -18,6 +18,11 @@ the root user. Certainly, this makes the example repository much more
 distribution-specific. However, it may certainly make your life simpler.
 It does ours :).
 
+There is a somewhat complicated scattering of .gitignore files throughout
+the repo which help to make changes which are important to the LG project
+(e.g.  anything inside /home/lg) obvious while tending to mask changes
+made which are outside the scope of the LG project (e.g. /var/)
+
 The following tree represents the suggested directory hierarchy 
 within the "lg" user's home directory:
 
