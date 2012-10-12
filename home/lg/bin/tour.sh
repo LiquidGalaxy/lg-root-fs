@@ -15,7 +15,7 @@
 
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
-if [ -f ${LG_SAVERLOCK} ]; then
+if [ -f "${LG_SAVERLOCK}" ]; then
     echo "lock encountered, adios"
     exit 0
 fi
