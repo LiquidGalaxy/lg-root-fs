@@ -71,7 +71,7 @@ sed -i -e "s:##HOMEDIR##:${HOME}:g" ${HOME}/.config/Google/*.conf
 sed -i \
   -e "s@##LG_IFACE_BASE##@${LG_IFACE_BASE}@g" \
   -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${ME_SCREEN:-0}]}@g" \
-  -e "s@##CHECK_REF##@$(cat /etc/hostname)-${ME_SCREEN:-0}@g" ${HOME}/.googleearth/*.kml
+  -e "s@##EARTH_KML_SYNC_TAG##@${EARTH_KML_SYNC_TAG[${ME_SCREEN:-0}]}@g" ${HOME}/.googleearth/*.kml
 
 while true ; do
     if [[ "$DIR" == "master" ]]; then

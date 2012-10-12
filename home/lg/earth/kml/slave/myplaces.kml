@@ -30,7 +30,7 @@
 			<NetworkLink>
 				<name>KML Update</name>
 				<Link>
-					<href>##LG_IFACE_BASE##/sync_nlc.php</href>
+					<href>##LG_IFACE_BASE##/sync_nlc.php?tag=##EARTH_KML_SYNC_TAG##</href>
 					<refreshMode>onInterval</refreshMode>
 					<refreshInterval>1</refreshInterval>
 				</Link>
