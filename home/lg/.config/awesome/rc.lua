@@ -78,6 +78,16 @@ for ge_instance = 0,3 do
     -- debugging
     -- io.stderr:write( "ts: " .. lg_touchscreen .. " ge_win_x item: " .. ge_instance .. " gets value: " .. ge_win_x[ge_instance] .. "\n" )
 end
+mp_win_x = {}
+for mp_instance = 0,3 do
+    if lg_touchscreen == "true" then
+        mp_win_x[mp_instance] = 1920+(lg_screen_width*(mp_instance-1))
+    else
+        mp_win_x[mp_instance] = lg_screen_width*mp_instance
+    end
+    -- debugging
+    -- io.stderr:write( "ts: " .. lg_touchscreen .. " ge_win_x item: " .. ge_instance .. " gets value: " .. ge_win_x[ge_instance] .. "\n" )
+end
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -404,6 +414,32 @@ awful.rules.rules = {
       properties = { floating = true,
                      ontop = true,
                      border_width = 0 } },
+    { rule = { class = 'MPlayer', instance = 'mp-ts' },
+      properties = { tag = tags[1][1],
+                     floating = true,
+                     width = 1920-lg_iface_width,
+                     height = 1080+lg_toolbar_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=lg_iface_width, y=0}) end },
+    { rule = { class = 'MPlayer', instance = 'mp-lgS0' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=mp_win_x[0], y=0}) end },
+    { rule = { class = 'MPlayer', instance = 'mp-lgS1' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=mp_win_x[1], y=0}) end },
+    { rule = { class = 'MPlayer', instance = 'mp-lgS2' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=mp_win_x[2], y=0}) end },
+    { rule = { class = 'MPlayer', instance = 'mp-lgS3' },
+      properties = { floating = true,
+                     width = lg_screen_width,
+                     height = lg_screen_height,
+                     border_width = 0 }, callback = function(c) c:geometry({x=mp_win_x[3], y=0}) end },
     -- All clients will match this rule.
     { rule = { },
       properties = { border_width = 0,

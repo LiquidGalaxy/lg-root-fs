@@ -38,6 +38,8 @@ fi
 SCREEN_NO=0
 SANITIZE_D=${DISPLAY//:/}
 [[ -n "${SANITIZE_D##*\.}" && "${SANITIZE_D##*\.}" -ne 0 ]] && export SCREEN_NO=${SANITIZE_D##*\.}
+MP_WINNAME="mp-lgS0"
+DISPLAY=:0
 
 DEGROTATE=36
 DEGVIEWABLE=29
@@ -45,10 +47,11 @@ DEGLOSSGAP=$(( ${DEGROTATE}-${DEGVIEWABLE} ))
 
 [[ -p "${MPVIDEOCTL}" ]] || mkfifo ${MPVIDEOCTL} && chmod 0664 ${MPVIDEOCTL}
 
-if [[ ${FRAME_NO} -eq 0 ]]; then
+if [ "${FRAME_NO}" -eq 0 ] && [ "${SCREEN_NO}" -eq 0 ]; then
 	[[ -p "${MPAUDIOCTL}" ]] || mkfifo ${MPAUDIOCTL} && chmod 0664 ${MPAUDIOCTL}
-	MPLAYER_UDPOPT="-udp-master -udp-ip 10.42.${LG_OCTET}.255 -udp-port"
+	MPLAYER_UDPOPT="-udp-master -udp-ip 127.255.255.255 -udp-port"
 	MPLAYER_AOOPT="-ao alsa"
+	MP_WINNAME="mp-ts"
 else
 	MPLAYER_UDPOPT="-udp-slave -udp-port"
 	MPLAYER_AOOPT="-ao null"
@@ -94,6 +97,7 @@ fi
 #    -vf screenshot,rectangle,crop=${WIDTH%%.*}::${CROPX%%.*}: \
 #    -vf screenshot,rectangle,crop=${WIDTH%%.*}:${HEIGHT%%.*}:${CROPX%%.*}:${CROPY%%.*} \
 if [ $SCREEN_NO -gt 0 ]; then
+    MP_WINNAME="mp-lgS${SCREEN_NO}"
     let MPLAYER_PORT=${MPLAYER_PORT}+2
 fi
 mplayer \
@@ -103,6 +107,7 @@ mplayer \
     -noconsolecontrols -idle -slave -input nodefault-bindings:file=${MPVIDEOCTL} \
     ${MPLAYER_UDPOPT} ${MPLAYER_PORT}\
     ${MPLAYER_AOOPT} \
+    -name ${MP_WINNAME} \
     -vo vdpau,xv -fs \
     ${MPLAYER_VFOPT} \
     -loop 0 -playlist "${VIDPLS}" \

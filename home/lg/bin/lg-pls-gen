@@ -35,15 +35,17 @@ SANITIZE_D=${DISPLAY//:/}
 
 # example: lg7 with two displays also acts as lg6
 if [[ -n "${SCREEN_NO}" ]]; then
-    if [[ $FRAME_NO -gt $(( ${LG_FRAMES_MAX}/2 )) ]]; then
-        FRAME_NO=$((${FRAME_NO}-1))
-    else
-        FRAME_NO=$((${FRAME_NO}+1))
+    if [ "${FRAME_NO}" -ne 0 ]; then
+        if [ "${FRAME_NO}" -gt $(( ${LG_FRAMES_MAX}/2 )) ]; then
+            FRAME_NO=$((${FRAME_NO}-1))
+        else
+            FRAME_NO=$((${FRAME_NO}+1))
+        fi
     fi
 fi
 
 echo -n '' > ${XDG_PLS_DIR}/default.pls || exit 1
-for collection in `find ${MEDIA_DIR} -mindepth 1 -maxdepth 1 -regex-type posix-basic -type d -not -iregex '.*/\(lost+found\|work\|noload\)' -printf '%f\n' | sort`; do
+for collection in `find ${MEDIA_DIR} -mindepth 1 -maxdepth 1 -regextype posix-basic -type d -not -iregex '.*/\(lost+found\|work\|noload\)' -printf '%f\n' | sort`; do
     echo -n '' > ${XDG_PLS_DIR}/${collection}.pls || exit 1
     echo "${MEDIA_DIR}/${collection}/${FRAME_NO}.avi" >>${XDG_PLS_DIR}/default.pls
     echo "${MEDIA_DIR}/${collection}/${FRAME_NO}.avi" >>${XDG_PLS_DIR}/${collection}.pls
