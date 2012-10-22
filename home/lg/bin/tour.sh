@@ -16,8 +16,13 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 if [ -f "${LG_SAVERLOCK}" ]; then
-    echo "lock encountered, adios"
-    exit 0
+    if [ "$( stat -c '%Z' "${LG_SAVERLOCK}" )" -ge "$( date --date="${LG_SAVERLOCK_MAX} seconds ago" +'%s' )" ]; then
+        echo "lock encountered, adios"
+        exit 0
+    else
+        echo "removing lock aged beyond ${LG_SAVERLOCK_MAX} seconds"
+        rm -vf "${LG_SAVERLOCK}"
+    fi
 fi
 
 list=${TOUCHSCRQRF:-/var/www/queries.txt}
