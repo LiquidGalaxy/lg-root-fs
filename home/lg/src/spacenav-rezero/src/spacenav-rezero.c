@@ -20,6 +20,11 @@ int main( int argc, char* argv[] )
   // Space Navigator: 046d c626
   handle = hid_open( 0x046d, 0xc626, NULL );
 
+  // Also try legacy device c628
+  if ( handle == NULL ) {
+    handle = hid_open( 0x046d, 0xc628, NULL );
+  }
+
   if ( handle == NULL ) {
     printf( "spacenav-rezero: Could not open HID device (got sudo?)\n" );
     exit( EXIT_FAILURE );
