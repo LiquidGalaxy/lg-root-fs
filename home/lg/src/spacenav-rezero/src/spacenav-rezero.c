@@ -26,7 +26,7 @@ int main( int argc, char* argv[] )
   }
 
   if ( handle == NULL ) {
-    printf( "spacenav-rezero: Could not open HID device (got sudo?)\n" );
+    fprintf( stderr, "%s: Could not open HID device (got sudo?)\n", argv[0] );
     exit( EXIT_FAILURE );
   }
 
@@ -35,7 +35,7 @@ int main( int argc, char* argv[] )
   res = hid_send_feature_report( handle, buf, sizeof(buf) );
 
   if ( res != sizeof(buf) ) {
-    printf( "spacenav-rezero: Write failed\n" );
+    fprintf( stderr, "%s: Write failed\n", argv[0] );
     exit( EXIT_FAILURE );
   }
 
