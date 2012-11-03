@@ -72,7 +72,7 @@ tourTrackSpeed=6
 tourTrackKeyframeSpacing=3
 
 [Render]
-AnisotropicFiltering_6_2=2
+AnisotropicFiltering_6_2=0
 Antialiasing=0
 DisableAdvancedFeatures=false
 ElevationExaggeration=1
