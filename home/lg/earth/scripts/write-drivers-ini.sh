@@ -38,6 +38,12 @@ if [[ "$VSYNC_RELAY" == "true" ]] && [[ "$MASTER" == "true" ]]; then
     VSYNCPORT=$((${VSYNCPORT}-1))
 fi
 
+# Disable input mechanisms for slaves
+if [[ "$VSYNC_RELAY" != "true" ]]; then
+    SPACENAVDEV=";"
+    EARTH_QUERY=";"
+fi
+
 FOV=${LG_HORIZFOV[${ME_SCREEN:-0}]}
 YAW=${LG_YAWOFFSET[${ME_SCREEN:-0}]}
 PITCH=${LG_PITCHOFFSET[${ME_SCREEN:-0}]}
