@@ -76,8 +76,8 @@ sed -i \
 while true ; do
     if [[ "$DIR" == "master" ]]; then
         lg-sudo pkill googleearth-bin
+        [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 1
     fi
-    [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 1
 
     cd ${BUILDDIR}/${EARTH_BUILD}
     rm -f ${HOME}/.googleearth/Cache/db* # important: otherwise we get random broken tiles
@@ -97,6 +97,9 @@ while true ; do
     LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ &
     lg-proc-watch -u ${ME_USER} -b googleearth-bin -n "Google Earth" -c ${WIN_NAME} -k 20
 
-    [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
+    if [[ "$DIR" == "master" ]]; then
+        [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 0
+    fi
+
     sleep 3
 done
