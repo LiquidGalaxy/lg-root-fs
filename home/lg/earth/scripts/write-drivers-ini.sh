@@ -39,7 +39,7 @@ if [[ "$VSYNC_RELAY" == "true" ]] && [[ "$MASTER" == "true" ]]; then
 fi
 
 # Disable input mechanisms for slaves
-if [[ "$VSYNC_RELAY" != "true" ]]; then
+if [[ "$MASTER" != "true" ]]; then
     SPACENAVDEV=";"
     EARTH_QUERY=";"
 fi
