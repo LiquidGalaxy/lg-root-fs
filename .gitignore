@@ -8,7 +8,6 @@
 !.gitignore
 !LICENSE
 !README
-/var/www/*php
 
 # BLACKLIST even with whitelisted items
 *~
@@ -17,6 +16,5 @@
 *.rpm
 *.deb
 lib/
-var/
 proc/
 sys/

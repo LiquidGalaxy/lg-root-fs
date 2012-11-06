@@ -26,6 +26,7 @@ GIT_DIR="${GIT_DIR:-$( dirname $0 )/../../.git}"
 log "prev_head_ref = $1, new_head_ref = $2, branch_flag = $3, git_dir = ${GIT_DIR}"
 
 LG_HOME="${GIT_DIR}/../home/lg"
+LG_VARD="${GIT_DIR}/../var"
 # can we get info from etc/passwd
 ETC_UID=$( awk -F':' '/^lg/ { print $3 }' ${GIT_DIR}/../etc/passwd 2>/dev/null )
 ETC_GID=$( awk -F':' '/^lg/ { print $4 }' ${GIT_DIR}/../etc/passwd 2>/dev/null )
@@ -40,3 +41,10 @@ chmod --preserve-root --changes --recursive g+w ${LG_HOME}/earth/config
 log "chmod sudoers files"
 chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers
 chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers.d/*
+
+log "chmod crontab files"
+chown --preserve-root --changes root:crontab ${LG_VARD}/spool/cron/crontabs
+chmod --preserve-root --changes 1730  ${LG_VARD}/spool/cron/crontabs
+chown --preserve-root --changes lg:root ${LG_VARD}/spool/cron/crontabs/lg
+chmod --preserve-root --changes 0600  ${LG_VARD}/spool/cron/crontabs/*
+
