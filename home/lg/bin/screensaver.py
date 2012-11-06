@@ -28,41 +28,20 @@ import re
 import statsd
 from statsd import StatsdTimer
 
+def get_my_name():
+  global myname	
+  if os.path.isfile('/etc/debian_chroot'):
+    myname = open('/etc/debian_chroot', "r").read()
+    myname = myname.rstrip('\n')
+    return myname
+  else:
+    myname = os.uname()[1]
+    return myname 
 
+#myname = get_my_name()
+#print 
+#statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname})
 
-#assign name to self. seen in stats collection.
-if os.path.isfile('/etc/debian_chroot'):
-  myname = open("/etc/debian_chroot","r").read()
-  myname = myname.rstrip('\n')
-else:
-  myname = os.uname()[1]
-
-statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname}
-timer = statsd.StatsdTimer('usage')
-timer.start()
-
-
-# Config
-## moved to cmd_line_args
-wake_check_per = 2
-tour_check_per = 40
-tour_wait_for_trigger = 2
-sleep_wait_for_trigger = 40
-
-# Input Devices
-space_nav = "/dev/input/spacenavigator"
-quanta_ts = "/dev/input/quanta_touch"
-#Time Range Data
-time_now = datetime.datetime.now().time()
-#OS variables
-sleep_range    = os.environ.get('LG_SLEEP_TIME')
-sleep_override = os.environ.get('LG_SLEEP_WAKE')
-sleep_lock = os.environ.get('LG_SAVERLOCK')
-# Commands
-wake_cmd = ">/dev/null /home/lg/bin/lg-tv-ctl on"
-sleep_cmd = ">/dev/null /home/lg/bin/lg-tv-ctl standby"
-
-#check for hint that device may need to be 'woken'
 def sleep_locked( file_name ):
   if os.path.isfile(file_name):
     print "lock_exists:", file_name, "monitor sleep as well as screensaver are disabled!"
@@ -92,6 +71,7 @@ def check_range():
     return False
 
 ##
+
 def Touched(dev1, dev2, runmode):
   # open file handles first
   with open(dev1) as a, open(dev2) as b:
@@ -99,7 +79,7 @@ def Touched(dev1, dev2, runmode):
       fd = dev.fileno()
       fcntl.fcntl(fd, fcntl.F_SETFL, os.O_NONBLOCK)
     # then sleep and let input accumulate
-    if   runmode == 1:
+    if runmode == 1:
       time.sleep(tour_check_per)
     elif runmode == 2:
       time.sleep(wake_check_per)
@@ -114,15 +94,44 @@ def Touched(dev1, dev2, runmode):
     return False
 
 def main():
-  #use getopts for optparsing
+  global wake_check_per, tour_check_per, tour_wait_for_trigger, sleep_wait_for_trigger, sleep_range, sleep_override, sleep_lock, myname, timer
+  get_my_name()
+  statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname})
+  timer = statsd.StatsdTimer('usage')
+  timer.start()
+  wake_check_per = 2
+  tour_check_per = 40
+  tour_wait_for_trigger = 2
+  sleep_wait_for_trigger = 40
+
+# Input Devices
+  space_nav = "/dev/input/spacenavigator"
+  quanta_ts = "/dev/input/quanta_touch"
+
+#Time Range Data
+  time_now = datetime.datetime.now().time()
+
+# OS variables
+  sleep_range    = os.environ.get('LG_SLEEP_TIME')
+  sleep_override = os.environ.get('LG_SLEEP_WAKE')
+  sleep_lock = os.environ.get('LG_SAVERLOCK')
+
+# Commands
+  wake_cmd = ">/dev/null /home/lg/bin/lg-tv-ctl on"
+  sleep_cmd = ">/dev/null /home/lg/bin/lg-tv-ctl standby"
+
+#Getopts for parsing arguments
+
   try:
-    opts, args = getopt.getopt(sys.argv[1:],"hp:t:",["--per_value=","--trigger_value="])
+    opts, args = getopt.getopt(sys.argv[1:],"hp:t:s:",["--per_value=","--trigger_value=","--script_file="])
   except getopt.GetoptError:
-    print 'screensaver.py -p <per_value> -t <trigger_value>'
+    print 'screensaver.py -p <per_value> -t <trigger_value> -s <script_file>'
+    print 'screensaver.py --per_value=N --trigger_value=N --script_file=S'
     sys.exit(2)
   for opt, arg in opts:
     if opt == '-h':
-      print 'screensaver.py -p <per_value> -t <trigger_value>'
+      print 'screensaver.py -p <per_value> -t <trigger_value> -s <script_file>'
+      print 'screensaver.py --per_value=N --trigger_value=N --script_file=S'
       sys.exit()
     elif opt in ("-p", "--per_value"):
       wake_check_per = float(arg)
@@ -130,11 +139,13 @@ def main():
     elif opt in ("-t", "--trigger_value"):
       tour_check_per = float(arg)
       sleep_wait_for_trigger = float(arg)
-
+    elif opt in ("-s", "--script_file"):
+      script = arg
   
-  cmd = sys.argv[-1] #this should will soon be a parsed argument -e
-  runmode = 1 # 1 = tour, 2 = displaysleep
+  cmd = script
+  runmode = 1 #1 = tour, 2 = displaysleep
   cnt = 0
+
   while True:
     if Touched(space_nav, quanta_ts, runmode):
       cnt = 0
@@ -148,16 +159,14 @@ def main():
       if cnt >= sleep_wait_for_trigger and check_range() == True:
         runmode = 2
         print "exec:", sleep_cmd, "schedule:", sleep_range, "run_mode: ", runmode, "count:", cnt
-	if sleep_override == "True" and sleep_locked(sleep_lock) == True:
-	  #we see there is a wake lock, so we will wake up despite its time to sleep.	
+        if sleep_override == "True" and sleep_locked(sleep_lock) == True:
           print "Notice: sleep and screensaver has been placed in override. exec:", wake_cmd 
-          timer.split('active')
           os.system(wake_cmd)
-	else:
+          timer.split('active')
+        else:
           print "Notice: sleep and screensaver are enabled. exec:", sleep_cmd
-	  #good night!
           os.system(sleep_cmd)
-	  timer.split('asleep')
+          timer.split('sleeping')
       elif cnt >= tour_wait_for_trigger and check_range() == False:
 	#good morning!
         print "exec:", wake_cmd, "exec:", cmd, "schedule:", sleep_range, "run_mode: ", runmode, "count:", cnt
