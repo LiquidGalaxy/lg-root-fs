@@ -1,0 +1,11 @@
+# INGORE everything by default
+*
+
+# DO NOT IGNORE _whitelisted_items_ within subdirs
+!*/
+
+# WHITELIST specific items
+!.gitignore
+!lg
+
+# BLACKLIST even with whitelisted items
