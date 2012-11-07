@@ -14,6 +14,7 @@
 # limitations under the License.
 ####Added
 ###The below class allows for sending to statsD on the head node
+#lkgc
 class StatsD {
 
     private $host, $port;
