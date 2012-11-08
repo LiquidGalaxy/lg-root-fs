@@ -23,4 +23,4 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-@reboot egrep 'LG_SLEEP_TIME|LG_SLEEP_WAKE|LG_SAVERLOCK' ${HOME}/etc/shell.conf > /tmp/.quickVars; . /tmp/.quickVars; export LG_SLEEP_TIME LG_SLEEP_WAKE LG_SAVERLOCK ;tmux new-session -d -s screensaver "/usr/bin/python $HOME/bin/screensaver.py -p 2 -t 3 ${HOME}/bin/tour.sh"
+@reboot egrep 'LG_SLEEP_TIME|LG_SLEEP_WAKE|LG_SAVERLOCK' ${HOME}/etc/shell.conf > /tmp/.quickVars; . /tmp/.quickVars; export LG_SLEEP_TIME LG_SLEEP_WAKE LG_SAVERLOCK ;tmux new-session -d -s screensaver "/usr/bin/python $HOME/bin/screensaver.py --per_value=30 --trigger_value=4 --script_file=${HOME}/bin/tour.sh"

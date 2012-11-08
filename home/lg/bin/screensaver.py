@@ -38,10 +38,7 @@ def get_my_name():
     myname = os.uname()[1]
     return myname 
 
-#myname = get_my_name()
-#print 
-#statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname})
-
+#determine if the sleep lock exists
 def sleep_locked( file_name ):
   if os.path.isfile(file_name):
     print "lock_exists:", file_name, "monitor sleep as well as screensaver are disabled!"
@@ -50,7 +47,7 @@ def sleep_locked( file_name ):
     print "lock_not_found:", file_name, "monitors will sleep! even when touched!!"
     return False
 
-#configure a logical time range
+#configure logical time range
 def configure_range( ranger):
   global s_time, e_time
   s_time_raw, e_time_raw = ranger.split('-', -1)
@@ -58,7 +55,7 @@ def configure_range( ranger):
   e_time_hour, e_time_min = e_time_raw.split(':', -1)
   s_time = datetime.datetime(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day, int(s_time_hour), int(s_time_min), 00).time()
   e_time = datetime.datetime(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day , int(e_time_hour), int(e_time_min), 00).time()
-  return#
+  return
 
 #how to tell if we are in/out of our range.
 def check_range():
@@ -70,8 +67,7 @@ def check_range():
     print "out_range", "time_now: ", datetime.datetime.now().time() , "sched_start", s_time, "sched_end", e_time
     return False
 
-##
-
+#determine when the touch interfaces are being used.
 def Touched(dev1, dev2, runmode):
   # open file handles first
   with open(dev1) as a, open(dev2) as b:
@@ -99,10 +95,10 @@ def main():
   statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname})
   timer = statsd.StatsdTimer('usage')
   timer.start()
-  wake_check_per = 2
-  tour_check_per = 40
-  tour_wait_for_trigger = 2
-  sleep_wait_for_trigger = 40
+  wake_check_per = 30
+  tour_check_per = 30
+  tour_wait_for_trigger = 4
+  sleep_wait_for_trigger = 4
 
 # Input Devices
   space_nav = "/dev/input/spacenavigator"
@@ -127,11 +123,13 @@ def main():
   except getopt.GetoptError:
     print 'screensaver.py -p <per_value> -t <trigger_value> -s <script_file>'
     print 'screensaver.py --per_value=N --trigger_value=N --script_file=S'
+    print 'please ensure that the BASH environment variables LG_SLEEP_TIME LG_SLEEP_WAKE LG_SAVERLOCK located in shell.conf are exported previous to running this script'
     sys.exit(2)
   for opt, arg in opts:
     if opt == '-h':
       print 'screensaver.py -p <per_value> -t <trigger_value> -s <script_file>'
       print 'screensaver.py --per_value=N --trigger_value=N --script_file=S'
+      print 'please ensure that the BASH environment variables LG_SLEEP_TIME LG_SLEEP_WAKE LG_SAVERLOCK located in shell.conf are exported previous to running this script'
       sys.exit()
     elif opt in ("-p", "--per_value"):
       wake_check_per = float(arg)
