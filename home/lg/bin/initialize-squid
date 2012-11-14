@@ -1,0 +1,20 @@
+#!/bin/bash
+
+MYUID=$( id -u )
+if [[ $MYUID -ne "0" ]]; then logger -p local3.err "$0: need root privs"; exit 1; fi
+
+SKELUSER="lg"
+SKELHOME="/home/${SKELUSER}"
+. ${SKELHOME}/etc/shell.conf
+
+ME=`cat /etc/hostname`
+PEER_LIST=${LG_FRAMES/$ME/}
+PEER_OUTPUT=""
+for PEER in ${PEER_LIST[*]}; do
+  PEER_OUTPUT="$PEER_OUTPUT
+cache_peer $PEER sibling 80 3130 proxy-only connect-timeout=3"
+done
+
+m4 -D__CACHE_PEERS__="${PEER_OUTPUT}" /etc/squid3/squid.conf.m4 > /etc/squid3/squid.conf.new
+mv /etc/squid3/squid.conf.new /etc/squid3/squid.conf
+service squid3 reload

@@ -60,8 +60,9 @@ cache_peer_domain googlekh kh.google.com
 # we can use light-weight GET of robots.txt to monitor squid3
 cache_peer www.endpoint.com parent 80 0 no-query no-digest originserver name=endpoint
 cache_peer_domain endpoint www.endpoint.com
-### OMIT CACHE PEERS HERE
-# see squid.conf.m4, /home/lg/bin/initialize-squid
+
+# display node cache peers
+__CACHE_PEERS__
 
 cache_mem 1024 MB
 maximum_object_size_in_memory 64 KB
