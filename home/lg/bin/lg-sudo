@@ -16,27 +16,74 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
+function run_parallel {
+  cmd=$1
+  to=$2
+  name=$3
+  ( $cmd ) &
+  pid=$!
+  ( sleep $to; kill $pid; echo "$pid on $name timed out" >&2 ) &
+  kpid=$!
+  wait $pid
+  kill $kpid >/dev/null 2>&1
+}
+
 while [ $# -gt 0 ]; do
   case $1 in
     --hosts|-h)
       shift
       LG_FRAMES="$1"
+      shift
+    ;;
+    --parallel|-p)
+      shift
+      cmd_parallel="true"
+    ;;
+    --wait|-w)
+      shift
+      cmd_wait_for="true"
+    ;;
+    --timeout|-t)
+      shift
+      cmd_p_timeout="$1"
+      shift
     ;;
     *)
-      CMD="$CMD $1"
+      break
     ;;
   esac
-  shift
 done
+
+[[ $# -lt 1 ]] && echo "No command specified!" && exit 2
+[[ "$cmd_parallel" != "true" && "$cmd_wait_for" == "true" ]] && echo "Warning: Can't wait without parallel" >&2
+[[ "$cmd_parallel" != "true" && -n "$cmd_p_timeout" ]] && echo "Warning: Can't timeout without parallel" >&2
+
+parallel=${cmd_parallel:-"false"}
+wait_for=${cmd_wait_for:-"false"}
+p_timeout=${cmd_p_timeout:-120}
+
+CMD="$@"
+
 [ -z "${LG_FRAMES}" ] && echo "LG_FRAMES is empty" && exit 1
 
-# creates control master sockets
-lg-ctl-master -u root
+lg-ctl-master
 
+pids=""
 for lg in $LG_FRAMES ; do
     echo
     echo $lg:
-    ssh -tt -x root@$lg "$CMD"
+    if [[ "$parallel" != "true" ]]; then
+      ssh -tt -x root@$lg "$CMD"
+    else
+      run_parallel "ssh -x root@$lg $CMD" $p_timeout $lg &
+      pids="${pids} $!"
+    fi
 done
+
+if [[ "$wait_for" == "true" ]]; then
+  for job in ${pids[*]}; do
+    wait $job
+  done
+fi
 
 exit 0
