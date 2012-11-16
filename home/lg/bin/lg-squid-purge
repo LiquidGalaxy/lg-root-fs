@@ -30,4 +30,6 @@ LOG_FILE="${HOME}/tmp/squid-purge.log"
 echo "Purge: $(date)" >${LOG_FILE}
 
 echo "Purging Squid..."
-lg-sudo-bg --hosts "${LG_FRAMES}" "killall -9 squidmon.sh; service squid3 stop; squid3 -k kill; mkdir -v /var/spool/squid3/oldcache; mv -vf /var/spool/squid3/* /var/spool/squid3/oldcache/; service squid3 start; rm -rf /var/spool/squid3/oldcache" >>${LOG_FILE} 2>>${LOG_FILE}
+lg-sudo --hosts "${LG_FRAMES}" --parallel --wait --timeout 15 "killall -9 squidmon.sh; service squid3 stop; squid3 -k kill; mkdir -v /var/spool/squid3/oldcache; mv -vf /var/spool/squid3/* /var/spool/squid3/oldcache/; service squid3 start" >>${LOG_FILE} 2>>${LOG_FILE}
+echo "Squid should be ready! Purging old cache in background."
+lg-sudo --hosts "${LG_FRAMES}" --parallel --timeout 0 "rm -rf /var/spool/squid3/oldcache"
