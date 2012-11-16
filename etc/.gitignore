@@ -153,6 +153,7 @@ nsswitch.conf
 odbc.ini
 odbcinst.ini
 openal/
+os-release
 pam.conf
 pam.d/
 papersize
