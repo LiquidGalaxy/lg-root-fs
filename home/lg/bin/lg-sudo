@@ -22,10 +22,14 @@ function run_parallel {
   name=$3
   ( $cmd ) &
   pid=$!
-  ( sleep $to; kill $pid; echo "$pid on $name timed out" >&2 ) &
-  kpid=$!
-  wait $pid
-  kill $kpid >/dev/null 2>&1
+  if [ $to -gt 0 ]; then
+    ( sleep $to; kill $pid; echo "$pid on $name timed out" >&2 ) &
+    kpid=$!
+    wait $pid
+    kill $kpid >/dev/null 2>&1
+  else
+    wait $pid
+  fi
 }
 
 while [ $# -gt 0 ]; do
