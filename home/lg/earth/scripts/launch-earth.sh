@@ -17,6 +17,7 @@
 . ${SHINCLUDE}/lg-functions
 
 if [[ "${FRAME_NO}" == "0" ]]; then
+    ${SCRIPDIR}/pano-kill.sh
     lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
     pkill -f viewsyncrelay.pl 
     pkill -u $(id -u) socat

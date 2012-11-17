@@ -1,6 +1,7 @@
 #!/bin/bash
 
-killall -9 pano-launcher.sh
-killall -9 xiv
+. ${HOME}/etc/shell.conf
 
-exit 0
+lg-run "killall -9 pano-launcher.sh"
+lg-run-bg "killall -9 xiv"
+lg-sudo-bg "killall -CONT googleearth-bin"

@@ -21,9 +21,8 @@ COLLECTION=${1:-default}
 PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
 
 if [[ "${FRAME_NO}" == "0" ]]; then
-    lg-run "~lg/earth/scripts/pano-kill.sh"
+    ${SCRIPDIR}/pano-kill.sh
     lg-sudo-bg "mount /media" # hax
-    sleep 1
     CLIENTS=""
     for SLAVE in ${XIV_SLAVES[*]}; do
 	HOSTSTUFF=${SLAVE%%@*}
