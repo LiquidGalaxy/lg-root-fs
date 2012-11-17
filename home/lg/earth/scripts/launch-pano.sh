@@ -17,10 +17,13 @@
 . ${SHINCLUDE}/lg-functions
 
 COLLECTION=${1:-default}
-
-PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
+ME=`basename $0`
 
 if [[ "${FRAME_NO}" == "0" ]]; then
+    [ ! -d "${XIV_ROOT}/${COLLECTION}" ] && { echo "$ME: Pano collection not found: ${COLLECTION}" >&2; exit 1; }
+    [ `ls -x ${XIV_ROOT}/${COLLECTION}/*.ppm | wc -l` -lt 1 ] && { echo "$ME: Pano collection is empty: ${COLLECTION}" >&2; exit 1; }
+    PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
+
     ${SCRIPDIR}/pano-kill.sh
     lg-sudo-bg "mount /media" # hax
     CLIENTS=""
