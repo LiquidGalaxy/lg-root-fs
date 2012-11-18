@@ -25,7 +25,7 @@ if [[ "${FRAME_NO}" == "0" ]]; then
     PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
 
     ${SCRIPDIR}/pano-kill.sh
-    lg-sudo-bg "mount /media" # hax
+    lg-sudo --parallel --wait "mount /media" # hax
     CLIENTS=""
     for SLAVE in ${XIV_SLAVES[*]}; do
 	HOSTSTUFF=${SLAVE%%@*}
@@ -43,5 +43,5 @@ if [[ "${FRAME_NO}" == "0" ]]; then
 	CLIENTS="${CLIENTS} -slavehost ${HOSTSTUFF}"
     done
     echo "CLIENTS: \"$CLIENTS\"" >&2
-    ~lg/earth/scripts/pano-launcher.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY -winclass xiv-lgS1 $CLIENTS -h360 $XIV_OPTS $PANO_FILE &
+    ${SCRIPDIR}/pano-launcher.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY -winclass xiv-lgS1 $CLIENTS -h360 $XIV_OPTS $PANO_FILE &
 fi
