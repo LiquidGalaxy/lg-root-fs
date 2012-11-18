@@ -33,10 +33,13 @@ if [[ "${FRAME_NO}" == "0" ]]; then
 	HOST=${HOSTSTUFF%%:*}
 	PORT=${HOSTSTUFF##*:}
 	CLASS=${SCREENSTUFF%%:*}
-	INDEX=${SCREENSTUFF##*:}
+	INDEXSTUFF=${SCREENSTUFF##*:}
+        INDEX=${INDEXSTUFF%%x*}
+        VERT=${INDEXSTUFF##*x}
+        VERT=${VERT:-0}
 	OFFSET=`echo "${INDEX} * ${LG_SCREEN_HEIGHT} + ${INDEX} * ${XIV_SCREENGAP}" | bc -l`
-	echo "HOST: \"$HOST\" PORT: \"$PORT\" CLASS: \"$CLASS\" INDEX: \"$INDEX\" OFFSET: \"$OFFSET\"" >&2
-        ssh $HOST "~lg/earth/scripts/pano-launcher.sh -winclass $CLASS -listenport $PORT -xoffset $OFFSET -h360 $XIV_OPTS $PANO_FILE" &
+	echo "HOST: \"$HOST\" PORT: \"$PORT\" CLASS: \"$CLASS\" INDEX: \"$INDEX\" VERT: \"$VERT\" OFFSET: \"$OFFSET\"" >&2
+        ssh $HOST "~lg/earth/scripts/pano-launcher.sh -winclass $CLASS -listenport $PORT -xoffset $OFFSET -yoffset $VERT -h360 $XIV_OPTS $PANO_FILE" &
 	CLIENTS="${CLIENTS} -slavehost ${HOSTSTUFF}"
     done
     echo "CLIENTS: \"$CLIENTS\"" >&2
