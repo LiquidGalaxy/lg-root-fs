@@ -13,10 +13,12 @@ while [ $# -gt 0 ]; do
     shift   
 done
 RSS_LIMIT=${1:-100000}
+ME=`basename $0`
 
 lg-sudo-bg --hosts "${LG_FRAMES}" "
-for instance in \`ps -o rss=,user= \$(pgrep googleearth-bin) | tr \" \" \":\"\`; do
+for instance in \`ps -o vsz=,user= \$(pgrep googleearth-bin) | sed -e 's/^\s*//g' -e 's/ /:/g'\`; do
     if [ \${instance%%:*} -lt ${RSS_LIMIT} ]; then
+        echo $ME 'killing' \${instance##*:} \${instance%%:*} >&2
         pkill -u \${instance##*:} googleearth-bin
     fi
 done
