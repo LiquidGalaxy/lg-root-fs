@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MYUID=$( id -u )
-if [[ $MYUID -ne "0" ]]; then logger -p local3.err "$0: need root privs"; exit 1; fi
+if [[ $MYUID -ne 0 ]]; then logger -p local3.err "$0: need root privs"; exit 1; fi
 
 SKELUSER="lg"
 SKELHOME="/home/${SKELUSER}"

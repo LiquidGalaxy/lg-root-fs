@@ -16,7 +16,7 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
-if [[ "${FRAME_NO}" == "0" ]]; then
+if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     ${SCRIPDIR}/pano-kill.sh
     lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
     pkill -f viewsyncrelay.pl 
@@ -38,7 +38,6 @@ if [[ "${FRAME_NO}" == "0" ]]; then
         viewsyncrelay.pl ${SHCONFDIR}/actions.yml &
     fi
     ###
-
 
     lg-run-bg ${SCRIPDIR}/run-earth-bin.sh
 fi

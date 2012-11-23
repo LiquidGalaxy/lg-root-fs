@@ -18,7 +18,7 @@
 
 LOGFILE=${HOME}/log/launch-aquarium.log
 
-if [[ "${FRAME_NO}" = "0" ]]; then
+if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     echo "[$( date )] launch-aquarium" > $LOGFILE
     {
     lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"

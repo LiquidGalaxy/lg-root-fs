@@ -16,7 +16,7 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
-if [[ "${FRAME_NO}" == "0" ]]; then
+if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     echo "[$( date )] launch-mplayer" >${HOME}/log/launch-mplayer.log
     lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
     pkill -f viewsyncrelay.pl
