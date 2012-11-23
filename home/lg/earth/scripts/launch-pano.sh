@@ -25,7 +25,6 @@ if [[ "${FRAME_NO}" == "0" ]]; then
     PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
 
     ${SCRIPDIR}/pano-kill.sh
-    lg-sudo --parallel --wait "mount /media" # hax
     CLIENTS=""
     for SLAVE in ${XIV_SLAVES[*]}; do
 	HOSTSTUFF=${SLAVE%%@*}

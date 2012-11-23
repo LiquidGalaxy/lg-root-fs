@@ -95,6 +95,7 @@ init.d/
 init/*.conf
 !init/galaxy.conf
 !init/lightdm.conf
+!init/squid3.conf
 initramfs-tools/update-initramfs.conf
 inputrc
 insserv.conf
