@@ -43,8 +43,9 @@ chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers
 chmod --preserve-root --changes 0440 ${GIT_DIR}/../etc/sudoers.d/*
 
 log "chmod crontab files"
+# FIXME the "crontab" GID may not always match inside the chroot
 chown --preserve-root --changes root:crontab ${LG_VARD}/spool/cron/crontabs
 chmod --preserve-root --changes 1730  ${LG_VARD}/spool/cron/crontabs
-chown --preserve-root --changes lg:root ${LG_VARD}/spool/cron/crontabs/lg
+chown --preserve-root --changes ${LG_USER}:root ${LG_VARD}/spool/cron/crontabs/lg
 chmod --preserve-root --changes 0600  ${LG_VARD}/spool/cron/crontabs/*
 
