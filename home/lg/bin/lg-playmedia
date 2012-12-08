@@ -1,0 +1,157 @@
+#!/bin/bash
+# Copyright 2012 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+. ${HOME}/etc/shell.conf
+. ${SHINCLUDE}/lg-functions
+
+ME=`basename $0`
+export DISPLAY=${DISPLAY:-:0}
+
+function usage {
+  echo >&2
+  echo "Usage: $ME [-l local_file | -r remote_file]" >&2
+  echo "Optional:" >&2
+  echo "          -h[elp] -z[ipped file] -o[mplayer opts] -n[oplay] -k[ill] -d[temp dir]" >&2
+  echo "          -w[window class] -g[eometry WxH+X+Y]" >&2
+  echo "          -m[aster] -s[lave] -i[p address] -p[ort number]" >&2
+  echo >&2
+}
+
+function examples {
+  echo >&2
+  echo "Examples:" >&2
+  echo >&2
+  echo "### Play a local audio file:" >&2
+  echo "$ME -l /media/foo.ogg" >&2
+  echo >&2
+  echo "### Play a video from a remote kmz:" >&2
+  echo "$ME -r http://lg-head/kml/tour.kmz -z video/foo.avi" >&2
+  echo >&2
+  echo "### Pre-fetch tour.kmz, but don't play anything:" >&2
+  echo "$ME -r http://lg-head/kml/tour.kmz -n" >&2
+  echo >&2
+  echo "### Set a video's window name to mp-ts:" >&2
+  echo "$ME -r http://lg-head/video/foo.mp4 -w mp-ts" >&2
+  echo >&2
+  echo "### Play a video in a 640x480 viewport, killing existing mplayer instances" >&2
+  echo "$ME -l foo.webm -g 640x480 -k" >&2
+  echo >&2
+}
+
+while getopts ":d:g:hkl:r:t:w:z:o:nmsi:p:" opt; do
+  case $opt in
+    d)
+      cmd_tempdir=${OPTARG};;
+    g)
+      cmd_geometry=${OPTARG};;
+    h)
+      cmd_help=1;;
+    k)
+      cmd_kill=1;;
+    l)
+      cmd_local_file=${OPTARG};;
+    r)
+      cmd_remote_file=${OPTARG};;
+    w)
+      cmd_window=${OPTARG};;
+    z)
+      cmd_zipped_file=${OPTARG};;
+    o)
+      cmd_mplayer_opts=${OPTARG};;
+    n)
+      cmd_noplay=1;;
+    m)
+      cmd_master=1;;
+    s)
+      cmd_slave=1;;
+    i)
+      cmd_ip_address=${OPTARG};;
+    p)
+      cmd_port=${OPTARG};;
+    \?)
+      echo "Invalid argument: -${OPTARG}" >&2
+      usage
+      exit 1
+      ;;
+    :)
+      echo "You must supply options to $ME!" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+TEMPDIR=${cmd_tempdir:-/tmp/$ME}
+MPLAYER_OPTS="-really-quiet -msglevel global=5 -nograbpointer -noconsolecontrols -nomouseinput -osdlevel 0 -ontop -cache 8192"
+
+[ -n "${cmd_window}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} -name ${cmd_window}"
+[ -n "${cmd_geometry}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} -geometry ${cmd_geometry}"
+[ -n "${cmd_master}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} -udp-master"
+[ -n "${cmd_slave}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} -udp-slave"
+[ -n "${cmd_ip_address}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} -udp-ip ${cmd_ip_address}"
+[ -n "${cmd_port}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} -udp-port ${cmd_port}"
+[ -n "${cmd_mplayer_opts}" ] && MPLAYER_OPTS="${MPLAYER_OPTS} ${cmd_mplayer_opts}"
+
+[ -n "${cmd_help}" ] && { usage; examples; exit 1; }
+
+### check for remote file, pull it down if needed
+if [ -n "${cmd_local_file}" ]; then  
+  FILE="${cmd_local_file}"
+
+elif [ -n "${cmd_remote_file}" ]; then
+  if [ -n "${cmd_local_file}" ]; then
+    echo "$ME: Can't use local and remote file at the same time!" >&2
+    usage
+    exit 1
+  fi
+
+  FILE=`basename ${cmd_remote_file}`
+  mkdir -pm 0700 ${TEMPDIR} || { echo "$ME: Can't create temp directory!" >&2 ; exit 1; }
+  cd ${TEMPDIR} || { echo "$ME: Can't access temp directory!" >&2 ; exit 1; }
+  wget -qN ${cmd_remote_file} || { echo "$ME: Couldn't retrieve remote file!" >&2 ; exit 1; }
+
+else
+  echo "$ME: Need a -l[ocal] or -r[emote] file to play!" >&2
+  usage
+  examples
+  exit 1
+fi
+
+### now we're ready to play (or not play) the media
+[ -n "${cmd_kill}" ] && killall mplayer >&/dev/null
+[ -n "${cmd_noplay}" ] && exit 0
+
+### make it go
+if [ -n "${cmd_zipped_file}" ]; then
+  echo "Playing ${cmd_zipped_file} from ${FILE}"
+  lg-log -m "Playing ${cmd_zipped_file} from ${FILE}"
+  unzip -p ${FILE} ${cmd_zipped_file} | mplayer ${MPLAYER_OPTS} - >&/dev/null &
+else
+  echo "Playing $FILE"
+  lg-log -m "Playing $FILE"
+  mplayer ${MPLAYER_OPTS} ${FILE} >&/dev/null &
+fi
+
+### see if it worked
+#for job in `jobs -p`; do
+#  wait $job
+#  if [ "$?" -ne 0 ]; then
+#    echo "$ME: Returned non-zero when playing ${FILE} ${cmd_zipped_file}" >&2
+#    lg-log -m "Returned non-zero when playing ${FILE} ${cmd_zipped_file}"
+#    exit 1
+#  fi
+#done
+
+# vim:set ai et sts=2 ts=2 sw=2 expandtab filetype=sh:
