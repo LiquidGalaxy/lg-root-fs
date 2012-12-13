@@ -18,14 +18,17 @@
 . ${HOME}/etc/shell.conf
 . ${SHINCLUDE}/lg-functions
 
+# This option prevents Earth from batching tile requests
+DRIVER_ARGS="-sConnection/disableRequestBatching=true"
+
 if [ "${LG_MASTERSLAVE[${ME_SCREEN:-0}]}" == "master" ]; then
     MASTER="true"
-    SLAVE="false"
+    DRIVER_ARGS="${DRIVER_ARGS} -sViewSync/send=true"
 else
     MASTER="false"
-    SLAVE="true"
+    DRIVER_ARGS="${DRIVER_ARGS} -sViewSync/receive=true"
 fi
-lg-log "master/slave: ${LG_MASTERSLAVE[${ME_SCREEN:-0}]} M=${MASTER} S=${SLAVE}"
+lg-log "master/slave: ${LG_MASTERSLAVE[${ME_SCREEN:-0}]} M=${MASTER}"
 
 MYIPALIAS="$( awk '/^ifconfig/ {print $3}' /etc/network/if-up.d/*-lg_alias )"
 VSYNCCHOP="${MYIPALIAS%.*}"
@@ -38,42 +41,38 @@ if [[ "$VSYNC_RELAY" == "true" ]] && [[ "$MASTER" == "true" ]]; then
     VSYNCPORT=$((${VSYNCPORT}-1))
 fi
 
-# Disable input mechanisms for slaves
-if [[ "$MASTER" != "true" ]]; then
-    SPACENAVDEV=";"
-    EARTH_QUERY=";"
-fi
+DRIVER_ARGS="${DRIVER_ARGS} -sViewSync/hostname=$VSYNCHOST -sViewSync/port=$VSYNCPORT"
 
 FOV=${LG_HORIZFOV[${ME_SCREEN:-0}]}
 YAW=${LG_YAWOFFSET[${ME_SCREEN:-0}]}
 PITCH=${LG_PITCHOFFSET[${ME_SCREEN:-0}]}
 ROLL=${LG_ROLLOFFSET[${ME_SCREEN:-0}]}
 
-cd ${EARTHDIR} || exit 1
+DRIVER_ARGS="${DRIVER_ARGS} \
+-sViewSync/yawOffset=$YAW \
+-sViewSync/pitchOffset=$PITCH \
+-sViewSync/rollOffset=$ROLL \
+-sViewSync/horizFov=$FOV"
 
-echo "MASTER: $MASTER"
-echo "SLAVE: $SLAVE"
-echo "VSYNCHOST: $VSYNCHOST"
-echo "VSYNCPORT: $VSYNCPORT"
-echo "YAW: $YAW"
-echo "PITCH: $PITCH"
-echo "ROLL: $ROLL"
-echo "FOV: $FOV"
-echo "NAV: $SPACENAVDEV"
-echo "QUERY: $EARTH_QUERY"
+# Enable input mechanisms for master
+if [[ "$MASTER" == "true" ]]; then
+  DRIVER_ARGS="${DRIVER_ARGS} \
+-sViewSync/queryFile=$EARTH_QUERY \
+-sSpaceNavigator/device=$SPACENAVDEV \
+-sSpaceNavigator/gutterValue=0.1 \
+-sSpaceNavigator/sensitivityPitch=0.01 \
+-sSpaceNavigator/sensitivityRoll=0.001 \
+-sSpaceNavigator/sensitivityYaw=0.0035 \
+-sSpaceNavigator/sensitivityX=0.25 \
+-sSpaceNavigator/sensitivityY=0.25 \
+-sSpaceNavigator/sensitivityZ=0.02 \
+-sSpaceNavigator/zeroPitch=0.0 \
+-sSpaceNavigator/zeroRoll=0.0 \
+-sSpaceNavigator/zeroYaw=0.0 \
+-sSpaceNavigator/zeroX=0.0 \
+-sSpaceNavigator/zeroY=0.0 \
+-sSpaceNavigator/zeroZ=0.0"
+  
+fi
 
-## THIS MUST BE HANDLED BEFORE NOW
-#chmod 644 builds/latest/drivers.ini
-
-# remember the navigator device AND query file will have "/"
-cat ${EARTHDIR}/config/drivers_template.ini |\
-  sed -e "s/##MASTER##/$MASTER/" \
-  -e "s/##SLAVE##/$SLAVE/" \
-  -e "s/##VSYNCHOST##/$VSYNCHOST/" \
-  -e "s/##VSYNCPORT##/$VSYNCPORT/" \
-  -e "s/##YAW##/$YAW/" \
-  -e "s/##PITCH##/$PITCH/" \
-  -e "s/##ROLL##/$ROLL/" \
-  -e "s/##FOV##/$FOV/" \
-  -e "s:##EARTH_QUERY##:$EARTH_QUERY:" \
-  -e "s:##NAV##:$SPACENAVDEV:" > ${BUILDDIR}/${EARTH_BUILD}/drivers.ini
+echo $DRIVER_ARGS

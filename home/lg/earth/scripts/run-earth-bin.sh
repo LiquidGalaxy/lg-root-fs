@@ -51,27 +51,12 @@ export __GL_SYNC_TO_VBLANK=1  # broken for nvidia when rotating screen
 
 cd ${SCRIPDIR} || { lg-log "could not cd into script dir, \"${SCRIPDIR}\"."; exit 1; }
 lg-log "running write-drivers - S:\"${ME_SCREEN:-0}\"."
-ME_SCREEN=${ME_SCREEN} ./write-drivers-ini.sh
+DRIVER_ARGS=`ME_SCREEN=${ME_SCREEN} ./write-drivers-ini.sh`
 
 DIR="${LG_MASTERSLAVE[${ME_SCREEN:-0}]}"
 WIN_NAME="${EARTH_WINNAME[${ME_SCREEN:-0}]}"
 
 MYCFGDIR="${CONFGDIR}/${DIR}"
-# build the configuration file
-m4 -I${MYCFGDIR} ${MYCFGDIR}/GECommonSettings.conf.m4 > ${MYCFGDIR}/$( basename `readlink ${MYCFGDIR}/GECommonSettings.conf.m4` .m4 )
-# prep for copy if needed
-mkdir -p -m 775 ${HOME}/.config/Google
-mkdir -p -m 700 ${HOME}/.googleearth
-# copying files AND potentially symlinks here
-cp -a ${MYCFGDIR}/*        ${HOME}/.config/Google/
-cp -a ${LGKMLDIR}/${DIR}/* ${HOME}/.googleearth/
-# expand the ##HOMEDIR## var in configs
-sed -i -e "s:##HOMEDIR##:${HOME}:g" ${HOME}/.config/Google/*.conf
-# expand vars (may contain ":" and "/") in kml files
-sed -i \
-  -e "s@##LG_IFACE_BASE##@${LG_IFACE_BASE}@g" \
-  -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${ME_SCREEN:-0}]}@g" \
-  -e "s@##EARTH_KML_SYNC_TAG##@${EARTH_KML_SYNC_TAG[${ME_SCREEN:-0}]}@g" ${HOME}/.googleearth/*.kml
 
 while true ; do
     if [[ "$DIR" == "master" ]]; then
@@ -79,10 +64,31 @@ while true ; do
         [ -w "${SPACENAVDEV}" ] && ${HOME}/bin/led-enable ${SPACENAVDEV} 1
     fi
 
-    cd ${BUILDDIR}/${EARTH_BUILD}
+    # clean up cache, temp files
+    cd ${BUILDDIR}/${EARTH_BUILD[${ME_SCREEN:-0}]}
     rm -f ${HOME}/.googleearth/Cache/db* # important: otherwise we get random broken tiles
     rm -rf ${HOME}/.googleearth/Temp/*
     rm -f ${EARTH_QUERY:-/tmp/query.txt}
+
+    # build the configuration files
+    m4 -I${MYCFGDIR} ${MYCFGDIR}/GECommonSettings.conf.m4 > ${MYCFGDIR}/GECommonSettings.conf
+    m4 -D__HOMEDIR__=${HOME} ${MYCFGDIR}/GoogleEarthPlus.conf.m4 > ${MYCFGDIR}/GoogleEarthPlus.conf
+
+    # prep for move if needed
+    mkdir -p -m 775 ${HOME}/.config/Google
+    mkdir -p -m 700 ${HOME}/.googleearth
+
+    # move configs into place
+    cp -a ${LGKMLDIR}/${DIR}/* ${HOME}/.googleearth/
+    mv ${MYCFGDIR}/GECommonSettings.conf ${HOME}/.config/Google/
+    mv ${MYCFGDIR}/GoogleEarthPlus.conf ${HOME}/.config/Google/
+
+    # expand vars (may contain ":" and "/") in kml files
+    sed -i \
+        -e "s@##LG_IFACE_BASE##@${LG_IFACE_BASE}@g" \
+        -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${ME_SCREEN:-0}]}@g" \
+        -e "s@##EARTH_KML_SYNC_TAG##@${EARTH_KML_SYNC_TAG[${ME_SCREEN:-0}]}@g" ${HOME}/.googleearth/*.kml
+
     # shove mouse over to touchscreen interface
     if [[ "$DIR" == "master" ]]; then
         # use the touchscreen
@@ -92,9 +98,9 @@ while true ; do
         #DISPLAY=:0 xtrlock & DISPLAY=:0 xdotool mousemove -screen 0 1190 1910
         DISPLAY=:0 xdotool mousemove -screen 0 1190 1910
     fi
+
     lg-log "running earth"
-    #./googleearth -style cleanlooks --fullscreen -font "-adobe-helvetica-bold-r-normal-*-${LG_FONT_SIZE}-*-*-*-p-*-iso8859-1"
-    LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ &
+    LD_PRELOAD=/usr/lib/libfreeimage.so.3 ./googleearth -style GTK+ ${DRIVER_ARGS} &
     lg-proc-watch -u ${ME_USER} -b googleearth-bin -n "Google Earth" -c ${WIN_NAME} -k 20
 
     if [[ "$DIR" == "master" ]]; then

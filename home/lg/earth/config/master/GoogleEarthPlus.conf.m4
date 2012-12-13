@@ -2,18 +2,17 @@
 allowUnsafeBalloons=false
 AlwaysUseExternalBrowser=true
 buildingHighlight=false
-CachePath=##HOMEDIR##/.googleearth/Cache
+CachePath=__HOMEDIR__/.googleearth/Cache
 ControllerEnabled=false
 ControllerMode=2
 CsiFrameStats=
-currentVersion=7.0.1.8144
 emailProvider=0
 enableTips=false
 FlySpeed=0.18
 GroundLevelAutoTransition=false
 InvertMouseWheel=false
 kmlErrorHandling=0
-KMLPath=##HOMEDIR##/.googleearth
+KMLPath=__HOMEDIR__/.googleearth
 Key="J3MWYQ7G1YU="
 lastHeight=1080
 lastLeft=0
@@ -72,10 +71,13 @@ tourTrackSpeed=6
 tourTrackKeyframeSpacing=3
 
 [Render]
-AnisotropicFiltering_6_2=0
+AnisotropicFiltering=2
+AnisotropicFiltering_6_2=2
 Antialiasing=0
+Atmosphere=true
 DisableAdvancedFeatures=false
 ElevationExaggeration=1
+FeetMiles=false
 GridReference=1
 IconSize=1
 MeasurementUnits=2
@@ -89,6 +91,9 @@ RenderingApi=1
 TerrainEnabled=true
 TextureColors=1
 TextureCompression=true
+TextureCompressionDXTC=true
+TerrainQuality=0
+WaterSurface=true
 3DImageryEnabled=true
 
 [Cache]
