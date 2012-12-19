@@ -1,0 +1,14 @@
+#!/bin/bash
+
+. ${HOME}/etc/shell.conf
+
+if [[ "$1" == "on" && "${LG_MASTERSLAVE[0]}" == "master" ]]; then
+
+echo \
+"DHCP_LG_IFACE_INDEX=\"index.php?tours=true\"
+DHCP_EARTH_BUILD=\"5.2 latest latest latest\"
+" > /lg/state.txt
+
+else
+  echo "" > /lg/state.txt
+fi
