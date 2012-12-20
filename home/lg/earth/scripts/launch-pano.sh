@@ -27,19 +27,19 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     ${SCRIPDIR}/pano-kill.sh
     CLIENTS=""
     for SLAVE in ${XIV_SLAVES[*]}; do
-	HOSTSTUFF=${SLAVE%%@*}
-	SCREENSTUFF=${SLAVE##*@}
-	HOST=${HOSTSTUFF%%:*}
-	PORT=${HOSTSTUFF##*:}
-	CLASS=${SCREENSTUFF%%:*}
-	INDEXSTUFF=${SCREENSTUFF##*:}
+        HOSTSTUFF=${SLAVE%%@*}
+        SCREENSTUFF=${SLAVE##*@}
+        HOST=${HOSTSTUFF%%:*}
+        PORT=${HOSTSTUFF##*:}
+        CLASS=${SCREENSTUFF%%:*}
+        INDEXSTUFF=${SCREENSTUFF##*:}
         INDEX=${INDEXSTUFF%%x*}
         VERT=${INDEXSTUFF##*x}
         VERT=${VERT:-0}
-	OFFSET=`echo "${INDEX} * ${LG_SCREEN_HEIGHT} + ${INDEX} * ${XIV_SCREENGAP}" | bc -l`
-	echo "HOST: \"$HOST\" PORT: \"$PORT\" CLASS: \"$CLASS\" INDEX: \"$INDEX\" VERT: \"$VERT\" OFFSET: \"$OFFSET\"" >&2
+        OFFSET=`echo "${INDEX} * ${LG_SCREEN_HEIGHT} + ${INDEX} * ${XIV_SCREENGAP}" | bc -l`
+        echo "HOST: \"$HOST\" PORT: \"$PORT\" CLASS: \"$CLASS\" INDEX: \"$INDEX\" VERT: \"$VERT\" OFFSET: \"$OFFSET\"" >&2
         ssh $HOST "~lg/earth/scripts/pano-launcher.sh -winclass $CLASS -listenport $PORT -xoffset $OFFSET -yoffset $VERT -h360 $XIV_OPTS $PANO_FILE" &
-	CLIENTS="${CLIENTS} -slavehost ${HOSTSTUFF}"
+        CLIENTS="${CLIENTS} -slavehost ${HOSTSTUFF}"
     done
     echo "CLIENTS: \"$CLIENTS\"" >&2
     ${SCRIPDIR}/pano-launcher.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY -winclass xiv-lgS1 $CLIENTS -h360 $XIV_OPTS $PANO_FILE &
