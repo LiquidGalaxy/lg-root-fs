@@ -34,8 +34,7 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
         CLASS=${SCREENSTUFF%%:*}
         INDEXSTUFF=${SCREENSTUFF##*:}
         INDEX=${INDEXSTUFF%%x*}
-        VERT=${INDEXSTUFF##*x}
-        VERT=${VERT:-0}
+        [[ "$INDEXSTUFF" == *x* ]] && VERT=${INDEXSTUFF##*x} || VERT=0
         OFFSET=`echo "${INDEX} * ${LG_SCREEN_HEIGHT} + ${INDEX} * ${XIV_SCREENGAP}" | bc -l`
         echo "HOST: \"$HOST\" PORT: \"$PORT\" CLASS: \"$CLASS\" INDEX: \"$INDEX\" VERT: \"$VERT\" OFFSET: \"$OFFSET\"" >&2
         ssh $HOST "~lg/earth/scripts/pano-launcher.sh -winclass $CLASS -listenport $PORT -xoffset $OFFSET -yoffset $VERT -h360 $XIV_OPTS $PANO_FILE" &
