@@ -91,7 +91,7 @@ except IOError as e:
 kml_doc += sv_kml
 
 if "place" in url:
-  kml_doc += '<Url><href>http://lg1:81/cgi-bin/sv_force.py?replace={},{},{},{},{},{},{}</href></Url>'.format(lon,lat,alt,rng,tilt,hdg,teralt)
+  kml_doc += '<Url><href>sv_force.py?replace={},{},{},{},{},{},{}</href></Url>'.format(lon,lat,alt,rng,tilt,hdg,teralt)
   kml_doc += '</NetworkLink>\n'
 elif "replace" in url:
   kml_doc += '</Document>\n'
