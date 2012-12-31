@@ -47,15 +47,16 @@ for output in ${RANDR_OUTPUTS}; do
         USE_RANDR_ORDER="${RANDR_ORDER} ${PREV_SCREEN}"
         PREV_SCREEN="${output}"
     fi
-    if [ "${FRAME_NO}" -eq 0 ] && [ "${MY_OUTPUT}" -eq "${OUTPUT_COUNT}" ]; then
-        logger -p local3.info "$0: adding xrandr options for output: \"${MY_OUTPUT}\" of \"${OUTPUT_COUNT}\" on frame: \"${FRAME_NO}\""
-        RANDR_OPTIONS="${RANDR_PREFIX} --output ${output} --auto --rotate normal ${USE_RANDR_ORDER} ${RANDR_OPTIONS}"
-        MY_OUTPUT=$(( ${MY_OUTPUT}+1 ))
+    logger -p local3.info "$0: adding xrandr options for output: \"${MY_OUTPUT}\" of \"${OUTPUT_COUNT}\" on frame: \"${FRAME_NO}\""
+
+    if [ "${DHCP_TOUCHSCREEN}" = "true" -a "${MY_OUTPUT}" -eq "${OUTPUT_COUNT}" ]; then
+       USE_RANDR="normal"
     else
-        logger -p local3.info "$0: adding xrandr options for output: \"${MY_OUTPUT}\" of \"${OUTPUT_COUNT}\" on frame: \"${FRAME_NO}\""
-        RANDR_OPTIONS="${RANDR_PREFIX} --output ${output} --auto --rotate ${RANDR} ${USE_RANDR_ORDER} ${RANDR_OPTIONS}"
-        MY_OUTPUT=$(( ${MY_OUTPUT}+1 ))
+       USE_RANDR="${RANDR}"
     fi
+
+    RANDR_OPTIONS="${RANDR_PREFIX} --output ${output} --auto --rotate ${USE_RANDR} ${USE_RANDR_ORDER} ${RANDR_OPTIONS}"
+    MY_OUTPUT=$(( ${MY_OUTPUT}+1 ))
 done
 
 logger -p local3.info "$0: executing xrandr with options: \"${RANDR_OPTIONS}\""
