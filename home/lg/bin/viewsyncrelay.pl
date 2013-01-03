@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use IO::Socket;
+use IO::Socket::UNIX qw( SOCK_STREAM SOMAXCONN );
 #use IO::Socket::Multicast;
 use IO::Select;
 use Getopt::Long;
@@ -20,8 +21,8 @@ $| = 1;
 # * Fetch kml.txt from lg-head, fetch KMLs it lists, get their actions.yml
 #     (name?) files, and combine them into one config.
 
-our ($verbose_in, $verbose_out, $verbose_link, $verbose_act, $verbose, $kml_server, $help)
-    = (0, 0, 0, 0, 0, 0);
+our ($verbose_in, $verbose_out, $verbose_link, $verbose_act, $verbose, $kml_server, $help, $fifo)
+    = (0, 0, 0, 0, 0, 0, undef);
 
 our @verbose_actions;
 
@@ -57,6 +58,13 @@ OPTIONS
         Make action NAME *very* verbose, without getting spam from all the
         other actions
 
+    -f /path/to/fifo, --fifo=/path/to/fifo
+        Open (optionally creating first) a FIFO at /path/to/fifo (relative
+        paths are acceptable as well) for control commands. This can also be
+        specified in the configuration file(s), but the command-line option
+        will override the config file. Further documentation is provided in the
+        sample config.yml.
+
     -v, --verbose
         Setting this option once is equivalent to setting --vi, --vo, --vl,
         --va, and --vt. This can be set multiple times
@@ -74,12 +82,23 @@ USAGE
 }
 
 sub child_action {
-    return if fork;
+    my $pid = fork;
+    return $pid if $pid;
+    
+
+    my $cmd = shift;
+    my $repl = shift;
+    my %repl = %$repl;
+
+    # Replace ${KEY} commands in $cmd
+    map {
+        $cmd =~ s/\$\{$_\}/$repl{$_}/g;
+    } keys %repl;
 
     open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
     open STDOUT, '/dev/null' or die "Can't write to /dev/null: $!";
 
-    exec @_;
+    exec $cmd;
     exit 0;
 }
 
@@ -169,16 +188,28 @@ sub match_constraints {
             }
         }
     };
-    return [$do_action, $result];
+    return [$do_action, $result, \%msg_vals];
 }
 
 sub run_action {
     my $name = shift;
     my $config = shift;
-    my ($last_fail, $fail_count) = (0, 0);
+    my $cmds = shift;
 
-    my @a = grep { $_ eq $name } @verbose_actions;
-    $verbose_act += $#a if $#a >= 0;
+    my ($last_fail, $fail_count) = (0, 0);
+    my $tour_started = ! exists $config->{tour_name};
+
+    if (exists $config->{verbose}) {
+        $verbose_act = $config->{verbose};
+    }
+
+    if (exists $config->{id}) {
+        my @a = grep { $_ eq $config->{id} } @verbose_actions;
+        $verbose_act += $#a if $#a >= 0;
+    }
+
+    print "Action $name disabled waiting for tour $config->{tour_name} to start\n"
+        if ($verbose_act > 1 && exists $config->{tour_name});
 
     my ($limits, $reset_limits);
     my $repeat = $config->{repeat} || 'DEFAULT';
@@ -192,17 +223,45 @@ sub run_action {
 
     my $run_next = 1;
     if ($config->{initially_disabled}) {
-        print "Disabling action $name at startup because of initially_disabled key\n" if $verbose_act;
+        print "Disabling action $name at startup\n" if $verbose_act;
         $run_next = 0;
     }
     my $running = 0;
+    my $pid;
 
+    STDIN:
     while (<STDIN>) {
         chomp;
         exit 0 if /^EXIT$/;
         next if /^$/;
         my $msg = $_;
         print "Action \"$name\" received $msg\n" if $verbose_act > 3;
+
+        if ($msg =~ /CONTROL:\W/) {
+            # Handle tour control commands
+            if ($msg =~ /\Wstarttour (.*)$/) {
+                if (exists $config->{tour_name} && $config->{tour_name} eq $1) {
+                    print "Enabling action $config->{id} as part of starting tour $config->{tour_name}\n"
+                        if ($verbose_act >= 1);
+                    $tour_started = 1;
+                }
+            }
+            elsif ($msg =~ /\Wexittour/) {
+                print "Disabling action $config->{id} with exit of tour\n"
+                    if ($verbose_act > 1 && exists $config->{tour_name});
+                $tour_started = 0;
+                $run_next = !($config->{initially_disabled});
+                $running = 0;
+                # XXX Make this work
+                system "kill -9 $pid" if $pid;
+            }
+            else {
+                print "Didn't recognize control message \"$msg\"\n";
+            }
+            next STDIN;
+        }
+
+        next STDIN unless $tour_started;
         
         my $do_action = 1;
 
@@ -219,15 +278,15 @@ sub run_action {
         }
         if ($run_next && $matches) {
             $run_next = 0 unless $repeat eq 'ALL';
-            print "Action $name ($config->{action}) is going to be run now (repeat mode: $repeat)\n" if $verbose_act;
-            child_action $config->{action};
+            print "Action $name ($config->{action}) is going to be run now (repeat mode: $repeat): " . Dumper($res->[2]) . "\n" if $verbose_act;
+            $pid = child_action($config->{action}, $cmds);
             $running = 1;
         }
         else {
             if ($running && !$matches && exists $config->{exit_action}) {
                 print "Running exit_action for $name: $config->{exit_action}\n"
                     if ($verbose_act > 0 && exists($config->{exit_action}) && defined($config->{exit_action}));
-                child_action $config->{exit_action};
+                $pid = child_action($config->{exit_action}, $cmds);
                 $running = 0;
             }
             if ($repeat ne 'ONCE' && $repeat ne 'RESET' && !$matches) {
@@ -248,8 +307,8 @@ sub run_action {
                     if ($verbose_act > 1 && ! $run_next) {
                         $fail_count++;
                         # Only print out every 15th failure, unless the last viewsync packet matched
-                        if (! $last_fail || $fail_count >= 15) {
-                            print "Not resetting RESET action $name because of failed test:" . Dumper($res2->[1]);
+                        if (! $last_fail || (exists $config->{fail_count} && $fail_count > $config->{fail_count}) || $fail_count >= 15) {
+                            print "Not resetting RESET action $name because of failed test: " . Dumper($res2->[1]);
                             $fail_count = 0;
                         }
                         $last_fail = 1;
@@ -270,6 +329,7 @@ sub run_linkage {
         chomp;
         exit 0 if /^EXIT$/;
         print "Linkage \"$name\" received $_\n" if $verbose_link > 1;
+        next if /^CONTROL:/;
         print $output_pipe "$_\n";
     }
 }
@@ -394,6 +454,7 @@ sub build_linkages {
 sub build_actions {
     my %actions;
     my $config = shift;
+    my $cmds = (exists $config->{action_commands} ? $config->{action_commands} : undef);
     for my $action (@{$config->{actions}}) {
         print Dumper($action) if $verbose_act > 2;
         my ($name, $input, $constraints) = 
@@ -402,7 +463,7 @@ sub build_actions {
                     unless exists $action->{$_};
                 $action->{$_};
             } qw/name input constraints/;
-        my ($action_pid, $action_pipe) = open_child( "Action \"$name\"", \&run_action, ( $name, $action ));
+        my ($action_pid, $action_pipe) = open_child( "Action \"$name\"", \&run_action, ( $name, $action, $cmds ));
         $action_pipe->autoflush();
         @{$actions{$name}}{qw/NAME INPUT PID STDIN/} = ( $name, $input, $action_pid, $action_pipe );
         $actions{$name}{initially_disabled} = 1 if exists $action->{initially_disabled};
@@ -431,6 +492,11 @@ sub load_config_file {
         }
         $config->{$_} = \@a;
     } qw/input_streams output_streams transformations linkages actions/;
+
+    my %file_ac = exists $file->{action_commands} ? %{$file->{action_commands}} : {};
+    my %config_ac = exists $config->{action_commands} ? %{$config->{action_commands}} : {};
+    @config_ac{keys %file_ac} = values %file_ac;
+    $config->{action_commands} = \%config_ac;
 
     # Copy an action's constraints to the next action's reset_constraints if
     #   1) the next action has a RESET repeat configuration
@@ -463,13 +529,14 @@ sub load_config {
         transformations => [],
         linkages => [],
         actions => [],
+        action_commands => {}
     );
 
     if ($downloaded_config) {
         my $tmp = YAML::Syck::Load($downloaded_config);
         map {
             push @{$config_values{$_}}, $tmp->{$_};
-        } qw/input_streams output_streams actions transformations linkages/;
+        } qw/input_streams output_streams actions transformations linkages action_commands/;
     }
 
     for my $file (@ARGV) {
@@ -487,6 +554,12 @@ sub load_config {
     return \%config_values;
 }
 
+sub reconstruct_viewsync {
+    push @_, ''
+        while ($#_ < 9);
+    return join(',', @_);
+}
+
 ## MAIN PROGRAM BEGINS HERE
 
 GetOptions(
@@ -497,6 +570,7 @@ GetOptions(
     "--sva=s" => \@verbose_actions,
     "--verbose+" => \$verbose,
     "--kml:s" => \$kml_server,
+    "--fifo:s" => \$fifo,
     "--help" => \$help
 );
 
@@ -534,6 +608,19 @@ my $config = load_config($downloaded_config);
 my $select = IO::Select->new;
 
 my %input_streams = %{ build_input_streams($config, $select) };
+if (exists $config->{control} || defined $fifo) {
+    use IO::Socket::UNIX;
+
+    $verbose && print "Opening FIFO $fifo\n";
+    $fifo ||= $config->{control};
+    my $r = IO::Socket::UNIX->new(
+        Type => SOCK_DGRAM,
+        LocalAddr => $fifo,
+        Listen => SOMAXCONN
+    ) or die "Couldn't set up control FIFO ($fifo): $@";
+    $$r->{vsr_control} = 1;
+    $select->add($r);
+}
 my %output_streams = %{ build_output_streams $config };
 my %linkages = %{ build_linkages($config, \%output_streams) };
 my %actions = %{ build_actions $config };
@@ -556,39 +643,50 @@ my $do_counter = 0;
 while (1) {
     my @handles = $select->can_read(0.5);
     if ($#handles >= 0) {
-        for my $a (@handles) {
+        HANDLE: for my $a (@handles) {
             my $msg;
             $a->recv($msg, 1024);
-            print "Input stream \"$$a->{viewsyncrelay_name}\" received $msg\n" if $verbose_in > 1;
-            my $input_stream_name = $$a->{viewsyncrelay_name};
-
-            my @viewsync = split(',', $msg);
-            my ($peer_port, $peer_addr) = sockaddr_in($a->peername);
-
-            if (!defined $input_streams{$input_stream_name}{PEER_ADDR}) {
-                @{ $input_streams{$input_stream_name} }{qw/PEER_ADDR PEER_PORT COUNTER/} = ( $peer_addr, $peer_port, $viewsync[0] );
-            }
-            elsif ($input_streams{$input_stream_name}{DO_COUNTER}) {
-                $viewsync[0] = ++$input_streams{$input_stream_name}{COUNTER};
-                $msg = join ',', @viewsync;
+            my ($input_stream_name, $control_fifo) = (undef, 0);
+            if (exists $$a->{vsr_control}) {
+                # This comes from the control FIFO
+                print "Control FIFO received $msg\n" if $verbose_in > 1;
+                $msg = 'CONTROL:\t' . $msg;
+                $control_fifo = 1;
             }
             else {
-                if ($viewsync[0] > $input_streams{$input_stream_name}{COUNTER}) { 
-                    $input_streams{$input_stream_name}{COUNTER} = $viewsync[0];
-                }
-                else {
-                    # Do we take control?
-                    print "View Counter has not increased. internal counter=$input_streams{$input_stream_name}{COUNTER}, recvd view_counter=$viewsync[0]\n" if $verbose_in > 0;
+                print "Input stream \"$$a->{viewsyncrelay_name}\" received $msg\n" if $verbose_in > 1;
+                $input_stream_name = $$a->{viewsyncrelay_name};
 
-                    # Has viewmaster host changed?
-                    if ($peer_addr eq $input_streams{$input_stream_name}{PEER_ADDR}) {
-                        print "View Master IP address is same as old, taking control of View Counter.\n" if $verbose_in > 0;
-                        $input_streams{$input_stream_name}{DO_COUNTER} = 1;
+                if ($msg !~ /^CONTROL:/) {
+                    my @viewsync = split(',', $msg);
+                    my ($peer_port, $peer_addr) = sockaddr_in($a->peername);
+
+                    if (!defined $input_streams{$input_stream_name}{PEER_ADDR}) {
+                        @{ $input_streams{$input_stream_name} }{qw/PEER_ADDR PEER_PORT COUNTER/} = ( $peer_addr, $peer_port, $viewsync[0] );
+                    }
+                    elsif ($input_streams{$input_stream_name}{DO_COUNTER}) {
                         $viewsync[0] = ++$input_streams{$input_stream_name}{COUNTER};
-                        $msg = join ',', @viewsync;
-                    } else {
-                        print "View Master IP address has changed from ". inet_ntoa($input_streams{$input_stream_name}{PEER_ADDR}) ." to ". inet_ntoa($peer_addr) . ". Exiting.\n";
-                        exit(0);
+                        $msg = reconstruct_viewsync(@viewsync);
+                    }
+                    else {
+                        if ($viewsync[0] > $input_streams{$input_stream_name}{COUNTER}) { 
+                            $input_streams{$input_stream_name}{COUNTER} = $viewsync[0];
+                        }
+                        else {
+                            # Do we take control?
+                            print "View Counter has not increased. internal counter=$input_streams{$input_stream_name}{COUNTER}, recvd view_counter=$viewsync[0]\n" if $verbose_in > 0;
+
+                            # Has viewmaster host changed?
+                            if ($peer_addr eq $input_streams{$input_stream_name}{PEER_ADDR}) {
+                                print "View Master IP address is same as old, taking control of View Counter.\n" if $verbose_in > 0;
+                                $input_streams{$input_stream_name}{DO_COUNTER} = 1;
+                                $viewsync[0] = ++$input_streams{$input_stream_name}{COUNTER};
+                                $msg = reconstruct_viewsync(@viewsync);
+                            } else {
+                                print "View Master IP address has changed from ". inet_ntoa($input_streams{$input_stream_name}{PEER_ADDR}) ." to ". inet_ntoa($peer_addr) . ". Exiting.\n";
+                                exit(0);
+                            }
+                        }
                     }
                 }
             }
@@ -601,6 +699,7 @@ while (1) {
                     my $key = $_;
                     print { $hash->{$key}{STDIN} } "$msg\n"
                         if ($hash->{$key}{INPUT} eq 'ALL' || 
+                            $control_fifo ||
                             $hash->{$key}{INPUT} eq $input_stream_name);
                 } ( keys %$hash );
             } ( \%linkages, \%actions );
