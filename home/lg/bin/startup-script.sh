@@ -37,7 +37,7 @@ nitrogen --set-${LG_BG_MODE} ${USE_BG_DIR}/${LG_BG_NAMEBASE}-${LG_BG_NAMEFIN}.${
 if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     if [ "${TOUCHSCREEN}" == "true" ]; then
         lg-log "launching kiosk browser on frame: \"${FRAME_NO}\""
-        x-www-browser --temp-profile --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --app="${LG_IFACE_BASE}/${LG_IFACE_INDEX}" &
+        x-www-browser --enable-webgl --enable-accelerated-compositing --disable-dev-tools --disable-logging --disable-metrics --disable-metrics-reporting --disable-breakpad --disable-default-apps --disable-extensions --disable-java --disable-plugins --disable-session-storage --disable-translate --force-compositing-mod --no-first-run --incognito --name="${LG_IFACE_WINNAME}" --kiosk "${LG_IFACE_BASE}/${LG_IFACE_INDEX}" &
     fi
     
     lg-log "executing galaxy launcher"
