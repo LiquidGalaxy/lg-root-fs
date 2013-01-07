@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 import os
+import inspect
 import time
 import random
 import cgi
 import cgitb
 cgitb.enable()
+
+FILE_NAME = os.path.basename(inspect.getfile(inspect.currentframe()))
 
 rid = random.random()
 url = cgi.FieldStorage()
@@ -91,7 +94,7 @@ except IOError as e:
 kml_doc += sv_kml
 
 if "place" in url:
-  kml_doc += '<Url><href>sv_force.py?replace={},{},{},{},{},{},{}</href></Url>'.format(lon,lat,alt,rng,tilt,hdg,teralt)
+  kml_doc += '<Url><href>{}?replace={},{},{},{},{},{},{}</href></Url>'.format(FILE_NAME,lon,lat,alt,rng,tilt,hdg,teralt)
   kml_doc += '</NetworkLink>\n'
 elif "replace" in url:
   kml_doc += '</Document>\n'
