@@ -1,0 +1,9 @@
+#!/bin/bash
+
+##### lg-config
+# Print a value from shell.conf to stdout.
+# If the value is not set, return 1 and print message to stderr.
+
+. ${HOME}/etc/shell.conf
+
+eval echo \${$1?"Not set"}
