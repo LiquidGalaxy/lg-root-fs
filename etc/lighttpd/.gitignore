@@ -7,6 +7,9 @@
 # WHITELIST specific items
 !.gitignore
 !lighttpd.conf
+!conf-available/05-serverport.conf
+!conf-available/10-accesslog.conf
+!conf-available/10-cgi.conf
 !conf-enabled/05-serverport.conf
 !conf-enabled/10-accesslog.conf
 !conf-enabled/10-cgi.conf
