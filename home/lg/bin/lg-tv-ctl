@@ -1,0 +1,13 @@
+#!/bin/bash
+# This script runs libCEC commands on all CEC adapters
+#
+# Command Reference in this app's console help output.
+# https://github.com/Pulse-Eight/libcec/blob/master/src/testclient/main.cpp
+
+. ${HOME}/etc/shell.conf
+
+${HOME}/bin/lg-run-bg "\
+for dev in /dev/ttyACM*; do
+    echo \"$@ 0\" | cec-client -d 3 -s \${dev}
+done
+"
