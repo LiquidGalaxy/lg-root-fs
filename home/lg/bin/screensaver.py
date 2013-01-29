@@ -28,16 +28,6 @@ import re
 import statsd
 from statsd import StatsdTimer
 
-def get_my_name():
-  global myname	
-  if os.path.isfile('/etc/debian_chroot'):
-    myname = open('/etc/debian_chroot', "r").read()
-    myname = myname.rstrip('\n')
-    return myname
-  else:
-    myname = os.uname()[1]
-    return myname 
-
 #determine if the sleep lock exists
 def sleep_locked( file_name ):
   if os.path.isfile(file_name):
@@ -90,9 +80,8 @@ def Touched(dev1, dev2, runmode):
     return False
 
 def main():
-  global wake_check_per, tour_check_per, tour_wait_for_trigger, sleep_wait_for_trigger, sleep_range, sleep_override, sleep_lock, myname, timer
-  get_my_name()
-  statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname})
+  global wake_check_per, tour_check_per, tour_wait_for_trigger, sleep_wait_for_trigger, sleep_range, sleep_override, sleep_lock, timer
+  statsd.init_statsd({'STATSD_HOST': 'lg-head'})
   timer = statsd.StatsdTimer('usage')
   timer.start()
   wake_check_per = 30
