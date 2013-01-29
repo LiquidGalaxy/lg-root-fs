@@ -31,15 +31,8 @@ tour_wait_for_trigger = 4
 space_nav = "/dev/input/spacenavigator"
 quanta_ts = "/dev/input/quanta_touch"
 # Stats
-statsd_connection = statsd.Connection(
-  host = 'lg-head',
-  port = 8125,
-  sample_rate = 1
-)
-statsd_client = statsd.Client('usage', statsd_connection)
-
-active_counter = statsd_client.get_client( 'active', statsd.Counter )
-idle_counter = statsd_client.get_client( 'idle', statsd.Counter )
+IDLE_STATE = 0
+ACTIVE_STATE = 1
 
 def Touched(dev1, dev2):
   # open file handles first
@@ -71,6 +64,22 @@ def Touched(dev1, dev2):
   return False
 
 def main():
+# Stats
+  statsd_connection = statsd.Connection(
+    host = 'lg-head',
+    port = 8125,
+    sample_rate = 1
+  )
+  statsd_client = statsd.Client('usage', statsd_connection)
+  
+  #active_counter = statsd_client.get_client( name = 'active', class_ = statsd.Counter )
+  #idle_counter = statsd_client.get_client( name = 'idle', class_ = statsd.Counter )
+  # Init timers
+  state = IDLE_STATE
+  idle_timer = statsd_client.get_client( name = 'idle', class_ = statsd.Timer )
+  idle_timer.start()
+  active_timer = None
+
   if len(sys.argv) != 2:
     print "Usage:", sys.argv[0], "<command>"
     print "<command> will be called every", tour_check_per, "seconds",
@@ -84,16 +93,31 @@ def main():
     if Touched(space_nav, quanta_ts):
       cnt = 0
       print "Touched."
-      active_counter += tour_check_per
+      if state == IDLE_STATE:
+        if idle_timer != None:
+          idle_timer.stop()
+        active_timer = statsd_client.get_client( name = 'active', class_ = statsd.Timer )
+        active_timer.start()
+        state = ACTIVE_STATE
+      elif state == ACTIVE_STATE:
+        active_timer.intermediate(subname = 'total')
     else:
       cnt += 1
       if cnt >= tour_wait_for_trigger:
         print cmd
         os.system(cmd)
-        idle_counter += tour_check_per
+        #idle_timer += tour_check_per
       else:
         print "Wait...", cnt
-        active_counter += tour_check_per
+        #idle_timer += tour_check_per
+      if state == ACTIVE_STATE:
+        if active_timer != None:
+          active_timer.stop()
+        idle_timer = statsd_client.get_client( name = 'idle', class_ = statsd.Timer )
+        idle_timer.start()
+        state = IDLE_STATE
+      elif state == IDLE_STATE:
+        idle_timer.intermediate(subname = 'total')
 
 if __name__ == '__main__':
   main()
