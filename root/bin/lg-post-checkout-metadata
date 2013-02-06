@@ -46,6 +46,6 @@ log "chmod crontab files"
 # FIXME the "crontab" GID may not always match inside the chroot
 chown --preserve-root --changes root:crontab ${LG_VARD}/spool/cron/crontabs
 chmod --preserve-root --changes 1730  ${LG_VARD}/spool/cron/crontabs
-chown --preserve-root --changes ${LG_USER}:root ${LG_VARD}/spool/cron/crontabs/lg
+chown --preserve-root --changes ${LG_USER}:crontab ${LG_VARD}/spool/cron/crontabs/${LG_USER}
 chmod --preserve-root --changes 0600  ${LG_VARD}/spool/cron/crontabs/*
 
