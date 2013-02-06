@@ -1,0 +1,1 @@
+@reboot lg /usr/bin/python /home/lg/bin/screensaver.py /home/lg/bin/tour.sh

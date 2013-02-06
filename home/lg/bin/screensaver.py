@@ -16,163 +16,108 @@
 """
 Executes applied command periodically while Space Navigator isn't touched.
 It can be used to add screensaver-ish application to Liquid Galaxy.
-Can also use dpms to put displays to sleep after a longer period of neglect.
 """
 
 import fcntl
 import os
-import sys, getopt
+import sys
 import time
-import datetime
-import re
 import statsd
-from statsd import StatsdTimer
 
-def get_my_name():
-  global myname	
-  if os.path.isfile('/etc/debian_chroot'):
-    myname = open('/etc/debian_chroot', "r").read()
-    myname = myname.rstrip('\n')
-    return myname
-  else:
-    myname = os.uname()[1]
-    return myname 
+# Config
+tour_check_per = 30
+tour_wait_for_trigger = 4
+# Input Devices
+space_nav = "/dev/input/spacenavigator"
+quanta_ts = "/dev/input/quanta_touch"
+# Stats
+IDLE_STATE = 0
+ACTIVE_STATE = 1
 
-#determine if the sleep lock exists
-def sleep_locked( file_name ):
-  if os.path.isfile(file_name):
-    print "lock_exists:", file_name, "monitor sleep as well as screensaver are disabled!"
-    return True
-  else:
-    print "lock_not_found:", file_name, "monitors will sleep! even when touched!!"
-    return False
-
-#configure logical time range
-def configure_range( ranger):
-  global s_time, e_time
-  s_time_raw, e_time_raw = ranger.split('-', -1)
-  s_time_hour, s_time_min = s_time_raw.split(':', -1)
-  e_time_hour, e_time_min = e_time_raw.split(':', -1)
-  s_time = datetime.datetime(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day, int(s_time_hour), int(s_time_min), 00).time()
-  e_time = datetime.datetime(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day , int(e_time_hour), int(e_time_min), 00).time()
-  return
-
-#how to tell if we are in/out of our range.
-def check_range():
-  configure_range(sleep_range)
-  if datetime.datetime.now().time() > s_time and datetime.datetime.now().time() < e_time:
-    print "in_range ", "time_now: ", datetime.datetime.now().time() , "sched_start", s_time, "sched_end", e_time
-    return True
-  else:
-    print "out_range", "time_now: ", datetime.datetime.now().time() , "sched_start", s_time, "sched_end", e_time
-    return False
-
-#determine when the touch interfaces are being used.
-def Touched(dev1, dev2, runmode):
+def Touched(dev1, dev2):
   # open file handles first
-  with open(dev1) as a, open(dev2) as b:
-    for dev in [a, b]:
-      fd = dev.fileno()
-      fcntl.fcntl(fd, fcntl.F_SETFL, os.O_NONBLOCK)
-    # then sleep and let input accumulate
-    if runmode == 1:
-      time.sleep(tour_check_per)
-    elif runmode == 2:
-      time.sleep(wake_check_per)
-    # then read input data, if any
-    for dev in [a, b]:
-      try:
-        dev.read(6000)
-        return True
-      except IOError:
-        pass
-    # default to return False if no USB devs Touched
-    return False
+  devlist = []
+  for dev in [dev1, dev2]:
+    try:
+      a = open(dev)
+    except:
+      print "Failed to open {0}".format( dev )
+    else:
+      devlist.append(a)
+
+  for dev in devlist:
+    fd = dev.fileno()
+    fcntl.fcntl(fd, fcntl.F_SETFL, os.O_NONBLOCK)
+
+  # then sleep and let input accumulate
+  time.sleep(tour_check_per)
+
+  # then read input data, if any
+  for dev in devlist:
+    try:
+      dev.read(6000)
+      return True
+    except IOError:
+      pass
+
+  # default to return False if no USB devs Touched
+  return False
 
 def main():
-  global wake_check_per, tour_check_per, tour_wait_for_trigger, sleep_wait_for_trigger, sleep_range, sleep_override, sleep_lock, myname, timer
-  get_my_name()
-  statsd.init_statsd({'STATSD_HOST': 'lg-head', 'STATSD_BUCKET_PREFIX': "%s" % myname})
-  timer = statsd.StatsdTimer('usage')
-  timer.start()
-  wake_check_per = 30
-  tour_check_per = 30
-  tour_wait_for_trigger = 4
-  sleep_wait_for_trigger = 4
-
-# Input Devices
-  space_nav = "/dev/input/spacenavigator"
-  quanta_ts = "/dev/input/quanta_touch"
-
-#Time Range Data
-  time_now = datetime.datetime.now().time()
-
-# OS variables
-  sleep_range    = os.environ.get('LG_SLEEP_TIME')
-  sleep_override = os.environ.get('LG_SLEEP_WAKE')
-  sleep_lock = os.environ.get('LG_SAVERLOCK')
-
-# Commands
-  wake_cmd = ">/dev/null /home/lg/bin/lg-tv-ctl on"
-  sleep_cmd = ">/dev/null /home/lg/bin/lg-tv-ctl standby"
-
-#Getopts for parsing arguments
-
-  try:
-    opts, args = getopt.getopt(sys.argv[1:],"hp:t:s:",["--per_value=","--trigger_value=","--script_file="])
-  except getopt.GetoptError:
-    print 'screensaver.py -p <per_value> -t <trigger_value> -s <script_file>'
-    print 'screensaver.py --per_value=N --trigger_value=N --script_file=S'
-    print 'please ensure that the BASH environment variables LG_SLEEP_TIME LG_SLEEP_WAKE LG_SAVERLOCK located in shell.conf are exported previous to running this script'
-    sys.exit(2)
-  for opt, arg in opts:
-    if opt == '-h':
-      print 'screensaver.py -p <per_value> -t <trigger_value> -s <script_file>'
-      print 'screensaver.py --per_value=N --trigger_value=N --script_file=S'
-      print 'please ensure that the BASH environment variables LG_SLEEP_TIME LG_SLEEP_WAKE LG_SAVERLOCK located in shell.conf are exported previous to running this script'
-      sys.exit()
-    elif opt in ("-p", "--per_value"):
-      wake_check_per = float(arg)
-      tour_wait_for_trigger = float(arg)
-    elif opt in ("-t", "--trigger_value"):
-      tour_check_per = float(arg)
-      sleep_wait_for_trigger = float(arg)
-    elif opt in ("-s", "--script_file"):
-      script = arg
+# Stats
+  statsd_connection = statsd.Connection(
+    host = 'lg-head',
+    port = 8125,
+    sample_rate = 1
+  )
+  statsd_client = statsd.Client('usage', statsd_connection)
   
-  cmd = script
-  runmode = 1 #1 = tour, 2 = displaysleep
-  cnt = 0
+  #active_counter = statsd_client.get_client( name = 'active', class_ = statsd.Counter )
+  #idle_counter = statsd_client.get_client( name = 'idle', class_ = statsd.Counter )
+  # Init timers
+  state = IDLE_STATE
+  idle_timer = statsd_client.get_client( name = 'idle', class_ = statsd.Timer )
+  idle_timer.start()
+  active_timer = None
 
+  if len(sys.argv) != 2:
+    print "Usage:", sys.argv[0], "<command>"
+    print "<command> will be called every", tour_check_per, "seconds",
+    print "after", (tour_check_per * tour_wait_for_trigger), "seconds"
+    print "if USB devs are not touched."
+    sys.exit(1)
+  
+  cmd = sys.argv[1]
+  cnt = 0
   while True:
-    if Touched(space_nav, quanta_ts, runmode):
+    if Touched(space_nav, quanta_ts):
       cnt = 0
-      print "Touched.", "schedule:", sleep_range, "run_mode: ", runmode, "count:", cnt
-      timer.split('active')
-      if runmode == 2:
-        os.system(wake_cmd)
-      runmode = 1
+      print "Touched."
+      if state == IDLE_STATE:
+        if idle_timer != None:
+          idle_timer.stop()
+        active_timer = statsd_client.get_client( name = 'active', class_ = statsd.Timer )
+        active_timer.start()
+        state = ACTIVE_STATE
+      elif state == ACTIVE_STATE:
+        active_timer.intermediate(subname = 'total')
     else:
       cnt += 1
-      if cnt >= sleep_wait_for_trigger and check_range() == True:
-        runmode = 2
-        print "exec:", sleep_cmd, "schedule:", sleep_range, "run_mode: ", runmode, "count:", cnt
-        if sleep_override == "True" and sleep_locked(sleep_lock) == True:
-          print "Notice: sleep and screensaver has been placed in override. exec:", wake_cmd 
-          os.system(wake_cmd)
-          timer.split('active')
-        else:
-          print "Notice: sleep and screensaver are enabled. exec:", sleep_cmd
-          os.system(sleep_cmd)
-          timer.split('sleeping')
-      elif cnt >= tour_wait_for_trigger and check_range() == False:
-	#good morning!
-        print "exec:", wake_cmd, "exec:", cmd, "schedule:", sleep_range, "run_mode: ", runmode, "count:", cnt
-        os.system(wake_cmd)
+      if cnt >= tour_wait_for_trigger:
+        print cmd
         os.system(cmd)
-        timer.split('idle')
+        #idle_timer += tour_check_per
       else:
-        print "Wait...", "count:", cnt, "run_mode: ", runmode
+        print "Wait...", cnt
+        #idle_timer += tour_check_per
+      if state == ACTIVE_STATE:
+        if active_timer != None:
+          active_timer.stop()
+        idle_timer = statsd_client.get_client( name = 'idle', class_ = statsd.Timer )
+        idle_timer.start()
+        state = IDLE_STATE
+      elif state == IDLE_STATE:
+        idle_timer.intermediate(subname = 'total')
 
 if __name__ == '__main__':
   main()
