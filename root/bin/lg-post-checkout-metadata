@@ -25,7 +25,8 @@ GIT_DIR="${GIT_DIR:-$( dirname $0 )/../../.git}"
 
 log "prev_head_ref = $1, new_head_ref = $2, branch_flag = $3, git_dir = ${GIT_DIR}"
 
-LG_HOME="${GIT_DIR}/../home/lg"
+LG_USER="lg"
+LG_HOME="${GIT_DIR}/../home/${LG_USER}"
 LG_VARD="${GIT_DIR}/../var"
 # can we get info from etc/passwd
 ETC_UID=$( awk -F':' '/^lg/ { print $3 }' ${GIT_DIR}/../etc/passwd 2>/dev/null )
@@ -46,6 +47,6 @@ log "chmod crontab files"
 # FIXME the "crontab" GID may not always match inside the chroot
 chown --preserve-root --changes root:crontab ${LG_VARD}/spool/cron/crontabs
 chmod --preserve-root --changes 1730  ${LG_VARD}/spool/cron/crontabs
-chown --preserve-root --changes ${LG_USER}:crontab ${LG_VARD}/spool/cron/crontabs/${LG_USER}
+chown --preserve-root --changes ${LG_UID}:crontab ${LG_VARD}/spool/cron/crontabs/${LG_USER}
 chmod --preserve-root --changes 0600  ${LG_VARD}/spool/cron/crontabs/*
 
