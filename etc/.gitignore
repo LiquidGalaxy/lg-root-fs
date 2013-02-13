@@ -102,6 +102,7 @@ insserv.conf
 insserv.conf.d/
 iproute2/
 issue.net
+issue.dpkg-dist
 kbd/
 kernel-img.conf
 kernel/
@@ -218,6 +219,7 @@ udev/rules.d/70-persistent-net.rules
 udev/rules.d/README
 udev/udev.conf
 ufw/
+vdpau_wrapper.cfg
 vga/
 vim/
 vtrgb
