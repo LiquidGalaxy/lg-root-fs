@@ -1,0 +1,6 @@
+#!/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+# This file created automatically by /home/lg/bin/personality.sh
+# to define an alias where lg systems can communicate
+ifconfig eth0:42 10.42.42.1 netmask 255.255.255.0
+# end of file

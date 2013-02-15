@@ -145,7 +145,6 @@ netconfig
 network/if-down.d/
 network/if-post-down.d/
 network/if-pre-up.d/wpasupplicant
-network/if-up.d/
 network/interfaces
 network/run
 networks
