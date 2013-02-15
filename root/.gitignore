@@ -8,3 +8,4 @@
 !.gitignore
 !.bashrc
 !.profile
+!.git-prompt.sh
