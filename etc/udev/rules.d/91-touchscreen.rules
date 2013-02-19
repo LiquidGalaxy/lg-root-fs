@@ -1,6 +1,12 @@
 # creates symlinks for some touchscreen devices
 # need group read permissions to device for screensaver
-
+#
+### legacy optical touchscreens
 SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", MODE="0640", GROUP="plugdev", SYMLINK+="input/quanta_touch"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", SYMLINK+="usb/quanta_touch"
 SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProduct}=="300[0-9]", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"
+#
+### Acer T232H covered by this
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", MODE="0640", GROUP="plugdev", SYMLINK+="input/cool_touch"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", SYMLINK+="usb/cool_touch"
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"
