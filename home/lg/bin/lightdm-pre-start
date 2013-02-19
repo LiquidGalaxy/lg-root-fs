@@ -13,7 +13,7 @@ XORGCONF_D="/etc/X11/xorg.conf.d"
 LAYOUTFILE="20-serverlayout.conf"
 INPUT_DEVS="40-inputdevices.conf"
 MOUSEPRFDEV=${DHCP_MOUSEPRFDEV:-"$( ls -1 /dev/input/by-id/*-event-mouse 2>/dev/null | head -n 1 )"}
-TOUCHPRFDEV=${DHCP_TOUCHPRFDEV:-"$( ls -1 /dev/input/*_touch 2>/dev/null | head -n 1 )"}
+TOUCHPRFDEV=${DHCP_TOUCHPRFDEV:-"$( basename `ls -1 /dev/input/*_touch 2>/dev/null | head -n 1` )"}
 
 if [ "${DHCP_MOUSEENABLE}" == "true" ]; then
     awk '/Event\ Mouse/{ gsub(/^[ \t]?#/,"")};{ print }' ${XORGCONF_D}/${LAYOUTFILE} >/tmp/${LAYOUTFILE}.new && mv -f /tmp/${LAYOUTFILE}.new ${XORGCONF_D}/${LAYOUTFILE}
