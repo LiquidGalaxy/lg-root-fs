@@ -17,7 +17,7 @@ TOUCHPRFDEV=${DHCP_TOUCHPRFDEV:-"$( basename `ls -1 /dev/input/*_touch | grep -v
 
 ### manage the lg_active_touch symlink
 if [ -h "/dev/input/${TOUCHPRFDEV}" ]; then
-    ln -snf /dev/input/${TOUCHPRFDEV} /dev/input/lg_active_touch
+    ln -snf ${TOUCHPRFDEV} /dev/input/lg_active_touch
 else
     ln -snf /dev/null /dev/input/lg_active_touch
 fi
