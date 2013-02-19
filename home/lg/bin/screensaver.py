@@ -29,7 +29,7 @@ tour_check_per = 30
 tour_wait_for_trigger = 4
 # Input Devices
 space_nav = "/dev/input/spacenavigator"
-quanta_ts = "/dev/input/quanta_touch"
+quanta_ts = "/dev/input/lg_active_touch"
 # Stats
 IDLE_STATE = 0
 ACTIVE_STATE = 1
