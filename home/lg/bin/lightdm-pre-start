@@ -13,6 +13,7 @@ XORGCONF_D="/etc/X11/xorg.conf.d"
 LAYOUTFILE="20-serverlayout.conf"
 INPUT_DEVS="40-inputdevices.conf"
 MOUSEPRFDEV=${DHCP_MOUSEPRFDEV:-"$( ls -1 /dev/input/by-id/*-event-mouse 2>/dev/null | head -n 1 )"}
+TOUCHPRFDEV=${DHCP_TOUCHPRFDEV:-"$( ls -1 /dev/input/*_touch 2>/dev/null | head -n 1 )"}
 
 if [ "${DHCP_MOUSEENABLE}" == "true" ]; then
     awk '/Event\ Mouse/{ gsub(/^[ \t]?#/,"")};{ print }' ${XORGCONF_D}/${LAYOUTFILE} >/tmp/${LAYOUTFILE}.new && mv -f /tmp/${LAYOUTFILE}.new ${XORGCONF_D}/${LAYOUTFILE}
@@ -22,7 +23,7 @@ Section \"InputDevice\"
     Driver          \"evdev\"
     Option          \"Device\"                \"${MOUSEPRFDEV}\"
     Option          \"SendCoreEvents\"        \"true\"
-EndSection" ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
+EndSection" -D__EVENT_TOUCH_BLOCK__="${TOUCHPRFDEV}" ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
 else
     awk '/Event\ Mouse/{c=1}c{$0 = "#" $0}{c=0}; { print }' ${XORGCONF_D}/${LAYOUTFILE} >/tmp/${LAYOUTFILE}.new && mv -f /tmp/${LAYOUTFILE}.new ${XORGCONF_D}/${LAYOUTFILE}
     m4 -D__EVENT_MOUSE_BLOCK__='' ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
