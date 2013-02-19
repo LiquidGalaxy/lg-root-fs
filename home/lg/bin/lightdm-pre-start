@@ -26,7 +26,7 @@ Section \"InputDevice\"
 EndSection" -D__EVENT_TOUCH_BLOCK__="${TOUCHPRFDEV}" ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
 else
     awk '/Event\ Mouse/{c=1}c{$0 = "#" $0}{c=0}; { print }' ${XORGCONF_D}/${LAYOUTFILE} >/tmp/${LAYOUTFILE}.new && mv -f /tmp/${LAYOUTFILE}.new ${XORGCONF_D}/${LAYOUTFILE}
-    m4 -D__EVENT_MOUSE_BLOCK__='' ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
+    m4 -D__EVENT_MOUSE_BLOCK__='' -D__EVENT_TOUCH_BLOCK__="${TOUCHPRFDEV}" ${XORGCONF_D}/${INPUT_DEVS}.m4 >/tmp/${INPUT_DEVS}.new && mv -f /tmp/${INPUT_DEVS}.new ${XORGCONF_D}/${INPUT_DEVS}
 fi
 
 exit 0
