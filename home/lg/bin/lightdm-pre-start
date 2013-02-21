@@ -19,7 +19,7 @@ TOUCHPRFDEV=${DHCP_TOUCHPRFDEV:-"$( basename `ls -1 /dev/input/*_touch | grep -v
 if [ -h "/dev/input/${TOUCHPRFDEV}" ]; then
     ln -snf ${TOUCHPRFDEV} /dev/input/lg_active_touch
 else
-    ln -snf /dev/null /dev/input/lg_active_touch
+    rm -f /dev/input/lg_active_touch
 fi
 
 if [ "${DHCP_MOUSEENABLE}" == "true" ]; then
