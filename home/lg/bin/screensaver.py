@@ -23,6 +23,18 @@ import os
 import sys
 import time
 import statsd
+import subprocess
+
+def checkConfig( key ):
+  conf = subprocess.Popen( ['/home/lg/bin/lg-config', key], stdout=subprocess.PIPE )
+  while( True ):
+    retcode = conf.poll()
+    if( retcode is not None ):
+      if( retcode == 0 ):
+        return conf.stdout.readline().strip()
+      else:
+        return ''
+
 
 # Config
 tour_check_per = 30
@@ -33,6 +45,7 @@ quanta_ts = "/dev/input/lg_active_touch"
 # Stats
 IDLE_STATE = 0
 ACTIVE_STATE = 1
+DEAD_STATE = 2
 
 def Touched(dev1, dev2):
   # open file handles first
@@ -90,33 +103,44 @@ def main():
   cmd = sys.argv[1]
   cnt = 0
   while True:
-    if Touched(space_nav, quanta_ts):
+
+    if checkConfig( 'LG_MASTERSLAVE' ).find('master') == -1:
+      print 'Not master, sleeping...'
+      state = DEAD_STATE
       cnt = 0
-      print "Touched."
       if state == IDLE_STATE:
+        idle_timer.stop()
+      elif state == ACTIVE_STATE:
+        active_timer.stop()
+      state = DEAD_STATE
+      time.sleep(tour_check_per)
+
+    elif Touched(space_nav, quanta_ts):
+      print "Touched."
+      cnt = 0
+      if state != ACTIVE_STATE:
+        state = ACTIVE_STATE
         if idle_timer != None:
           idle_timer.stop()
         active_timer = statsd_client.get_client( name = 'active', class_ = statsd.Timer )
         active_timer.start()
-        state = ACTIVE_STATE
-      elif state == ACTIVE_STATE:
+      else:
         active_timer.intermediate(subname = 'total')
+
     else:
       cnt += 1
       if cnt >= tour_wait_for_trigger:
         print cmd
         os.system(cmd)
-        #idle_timer += tour_check_per
       else:
         print "Wait...", cnt
-        #idle_timer += tour_check_per
-      if state == ACTIVE_STATE:
+      if state != IDLE_STATE:
+        state = IDLE_STATE
         if active_timer != None:
           active_timer.stop()
         idle_timer = statsd_client.get_client( name = 'idle', class_ = statsd.Timer )
         idle_timer.start()
-        state = IDLE_STATE
-      elif state == IDLE_STATE:
+      else:
         idle_timer.intermediate(subname = 'total')
 
 if __name__ == '__main__':
