@@ -49,7 +49,7 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
 elif [[ "${LG_MASTERSLAVE[0]:-slave}" == "slave" ]]; then
     # slaves just wait for master
     # we need to add a method for slave instances to "notify" the master that they have started
-    lg_log "slave node with frame_no: \"${FRAME_NO}\", ready"
+    lg-log "slave node with frame_no: \"${FRAME_NO}\", ready"
 else
     # will wait up to 9 seconds in increments of 3
     # to get an IP
