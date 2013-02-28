@@ -3,5 +3,5 @@
 # XXX: 0644 will probably prevent earth from turning on the LED
 
 # "SYSFS" selection is depricated
-SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c626", MODE="0664", GROUP="plugdev", SYMLINK+="input/spacenavigator"
-SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c626", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c62[68]", MODE="0664", GROUP="plugdev", SYMLINK+="input/spacenavigator"
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c62[68]", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"
