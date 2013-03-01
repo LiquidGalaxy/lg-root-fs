@@ -1,2 +1,4 @@
 # Acer T232HL
 SUBSYSTEM=="usb", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", RUN+="/bin/sh /etc/udev/load_hid_multitouch.sh $env{ID_VENDOR_ID} $env{ID_MODEL_ID}"
+# 3M MicroTouch
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0596", ATTRS{idProduct}=="0516", RUN+="/bin/sh /etc/udev/load_hid_multitouch.sh $env{ID_VENDOR_ID} $env{ID_MODEL_ID}"

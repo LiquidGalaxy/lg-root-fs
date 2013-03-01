@@ -10,3 +10,8 @@ SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0408", ATTRS{idProd
 SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", MODE="0640", GROUP="plugdev", SYMLINK+="input/cool_touch"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", SYMLINK+="usb/cool_touch"
 SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="2149", ATTRS{idProduct}=="2306", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"
+#
+### 3M MicroTouch
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0596", ATTRS{idProduct}=="0516", MODE="0640", GROUP="plugdev", SYMLINK+="input/micro_touch"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0596", ATTRS{idProduct}=="0516", SYMLINK+="usb/micro_touch"
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{idVendor}=="0596", ATTRS{idProduct}=="0516", ACTION=="add", RUN+="/usr/bin/sudo -H -u lg /home/lg/bin/udev-run-react"
