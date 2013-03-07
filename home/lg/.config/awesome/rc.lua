@@ -66,7 +66,6 @@ lg_wm_gap = os.getenv("LG_WM_GAP")
 lg_toolbar_height = os.getenv("LG_TOOLBAR_HEIGHT")
 -- calculate GE window positions for each instance
 lg_touchscreen = os.getenv("TOUCHSCREEN")
-lg_iface_name = os.getenv("LG_IFACE_WINNAME")
 lg_iface_width = os.getenv("LG_IFACE_WIDTH")
 lg_iface_height = os.getenv("LG_IFACE_HEIGHT")
 ge_win_x = {}
@@ -370,7 +369,7 @@ awful.rules.rules = {
     { rule = { class = "pinentry" },
       properties = { floating = true } },
       -- Touchscreen Interface
-    { rule = { class = 'Chromium-browser', instance = lg_iface_name },
+    { rule = { class = 'Chromium-browser', instance = 'Chromium-browser (/tmp/chromium-browser-iface)' },
       properties = { tag = tags[1][1],
                      floating = true,
                      width = lg_iface_width,
