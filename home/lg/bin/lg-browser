@@ -1,0 +1,53 @@
+#!/bin/bash
+
+function print_usage {
+  echo "`basename $0`: Launch a browser window." >&2
+  echo "" >&2
+  echo "Args:" >&2
+  echo "-b[inary]  : The binary to use. [default: chromium-browser]" >&2
+  echo "-u[rl]     : The url to launch." >&2
+  echo "-w[window] : Window name (can be iface, ts, lgS0 - lgS3)" >&2
+  echo "-h[elp]    : Print this information." >&2
+}
+
+while getopts ":b:hu:w:" opt; do
+  case $opt in
+    b)
+      cmd_bin=$OPTARG;;
+    h)
+      print_usage
+      exit 1;;
+    u)
+      cmd_url=$OPTARG;;
+    w)
+      cmd_window=$OPTARG;;
+    \?)
+      echo "Invalid argument: -${OPTARG}" >&2
+      print_usage
+      exit 1;;
+    :)
+      echo "You must specify options to -${OPTARG}" >&2
+      print_usage
+      exit 1;;
+  esac
+done
+
+window=${cmd_window?"
+  A window name [-w] must be provided to `basename $0`!
+  Try iface, ts, or lgS0 through lgS3
+"}
+
+url=${cmd_url?"A url [-u] must be specified to `basename $0`!"}
+bin=${cmd_bin:-"chromium-browser"}
+
+STANDARD_ARGS="--enable-webgl --enable-accelerated-compositing
+               --disable-dev-tools --disable-logging --disable-metrics
+               --disable-metrics-reporting --disable-breakpad
+               --disable-default-apps --disable-extensions --disable-java
+               --disable-session-storage --disable-translate
+               --force-compositing-mod --no-first-run --incognito
+               --kiosk"
+
+export DISPLAY=${DISPLAY:-":0"}
+
+${bin} ${STANDARD_ARGS} --user-data-dir="/tmp/${bin}-${window}" "${url}"
