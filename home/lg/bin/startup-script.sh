@@ -26,6 +26,7 @@ xsetroot -solid black &
 xset dpms 0 0 0 -dpms s blank s noexpose s 0 0 &
 xinput set-int-prop "3Dconnexion SpaceNavigator" "Device Enabled" 8 0 &
 xhost +local: &
+nvidia-settings -a "FSAA=${LG_FSAA}" -a "FSAAAppControlled=0" -a "FSAAAppEnhanced=0"
 if [ -x "${LG_MEDIA_MNT}/backgrounds" -a -f "${LG_MEDIA_MNT}/backgrounds/lg-bg-noframe.png" ]; then
     USE_BG_DIR="${LG_MEDIA_MNT}/backgrounds"
 else
