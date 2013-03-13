@@ -56,7 +56,7 @@ wasMaximized=false
 
 [TourGuide]
 Filmstrip\Expanded=false
-Filmstrip\Enabled=true
+Filmstrip\Enabled=false
 
 [Layer]
 tourFlyTime=10

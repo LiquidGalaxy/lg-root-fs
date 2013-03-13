@@ -37,8 +37,8 @@ def checkConfig( key ):
 
 
 # Config
-tour_check_per = 30
-tour_wait_for_trigger = 4
+tour_check_per = 30 # this is fixed
+tour_wait_for_trigger = 4 # this is the default, also set in shell.conf LG_SAVER_WAITS
 # Input Devices
 space_nav = "/dev/input/spacenavigator"
 quanta_ts = "/dev/input/lg_active_touch"
@@ -103,6 +103,12 @@ def main():
   cmd = sys.argv[1]
   cnt = 0
   while True:
+
+    # update tour wait time from shell.conf
+    try:
+      tour_wait_for_trigger = int( checkConfig( 'LG_SAVER_WAITS' ) )
+    except ValueError:
+      print 'WARNING: LG_SAVER_WAITS is not an integer!'
 
     if checkConfig( 'LG_MASTERSLAVE' ).find('master') == -1:
       print 'Not master, sleeping...'
