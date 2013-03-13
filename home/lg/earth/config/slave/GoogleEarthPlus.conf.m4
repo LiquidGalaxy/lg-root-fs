@@ -88,6 +88,7 @@ PrimaryFontVersion3Size=14
 PrimaryFontVersion3Style=0
 PrimaryFontVersion3Weight=75
 RenderingApi=1
+StatusBarVisible=true
 TerrainEnabled=true
 TextureColors=1
 TextureCompression=true
