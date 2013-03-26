@@ -86,6 +86,7 @@ while true ; do
     # expand vars (may contain ":" and "/") in kml files
     sed -i \
         -e "s@##LG_IFACE_BASE##@${LG_IFACE_BASE}@g" \
+        -e "s@##LG_SV_FORCE_PATH##@${LG_SV_FORCE_PATH}@g" \
         -e "s@##EARTH_KML_UPDATE_URL##@${EARTH_KML_UPDATE_URL[${ME_SCREEN:-0}]}@g" \
         -e "s@##EARTH_KML_SYNC_TAG##@${EARTH_KML_SYNC_TAG[${ME_SCREEN:-0}]}@g" ${HOME}/.googleearth/*.kml
 
