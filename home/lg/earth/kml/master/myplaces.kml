@@ -23,13 +23,13 @@
 			<NetworkLink>
 				<name>Master KML</name>
 				<Link>
-					<href>##LG_IFACE_BASE##/kml/master.kml</href>
+					<href>##LG_KML_SYNC_BASE##/kml/master.kml</href>
 				</Link>
 			</NetworkLink>
 			<NetworkLink>
 				<name>KML Update</name>
 				<Link>
-					<href>##LG_IFACE_BASE##/sync_nlc.php?tag=##EARTH_KML_SYNC_TAG##</href>
+					<href>##LG_KML_SYNC_BASE##/sync_nlc.php?tag=##EARTH_KML_SYNC_TAG##</href>
 					<refreshMode>onInterval</refreshMode>
 					<refreshInterval>1</refreshInterval>
 				</Link>
@@ -39,7 +39,7 @@
 				<description>The view-based refresh allows the remote server to calculate
 			    the center of your screen and return a placemark.</description>
 				<Link>
-					<href>##LG_IFACE_BASE##/cgi-bin/viewBookmark.py</href>
+					<href>##LG_KML_SYNC_BASE##/cgi-bin/viewBookmark.py</href>
 					<refreshMode>onInterval</refreshMode>
 					<refreshInterval>1</refreshInterval>
 					<viewRefreshMode>onStop</viewRefreshMode>
