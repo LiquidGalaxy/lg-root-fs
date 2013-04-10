@@ -50,4 +50,4 @@ STANDARD_ARGS="--enable-webgl --enable-accelerated-compositing
 
 export DISPLAY=${DISPLAY:-":0"}
 
-${bin} --user-data-dir="/tmp/${bin}-${window}" ${STANDARD_ARGS} "${url}" --name=${window}
+${bin} --user-data-dir="/tmp/${bin}-${window}" ${STANDARD_ARGS} "${url}"
