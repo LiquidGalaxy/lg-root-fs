@@ -83,6 +83,10 @@ while true ; do
     mv ${MYCFGDIR}/GECommonSettings.conf ${HOME}/.config/Google/
     mv ${MYCFGDIR}/GoogleEarthPlus.conf ${HOME}/.config/Google/
 
+    if [ "${LG_SV_FORCE_ENABLE}" -ne "*true*" ]; then
+      LG_SV_FORCE_PATH="404"
+    fi
+
     # expand vars (may contain ":" and "/") in kml files
     sed -i \
         -e "s@##LG_KML_SYNC_BASE##@${LG_KML_SYNC_BASE}@g" \
