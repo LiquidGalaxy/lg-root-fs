@@ -124,6 +124,7 @@ logrotate.d/
 login.defs
 lsb-base-logging.sh
 lsb-release
+lvm/
 magic
 magic.mime
 mailcap
