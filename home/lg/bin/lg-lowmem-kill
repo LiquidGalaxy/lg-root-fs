@@ -16,10 +16,14 @@ RSS_LIMIT=${1:-100000}
 ME=`basename $0`
 
 lg-sudo-bg --hosts "${LG_FRAMES}" "
-for instance in \`ps -o vsz=,user= \$(pgrep googleearth-bin) | sed -e 's/^\s*//g' -e 's/ /:/g'\`; do
-    if [ \${instance%%:*} -lt ${RSS_LIMIT} ]; then
-        logger -p local3.info \"$ME killing \${instance##*:} \${instance%%:*}\"
-        pkill -u \${instance##*:} googleearth-bin
+for instance in \`ps -o vsz=,pid=,stat= \$(pgrep googleearth-bin) | sed -e 's/^\s*//g' -e 's/\s/:/g'\`; do
+    VSZ=\${instance%%:*}
+    STAT=\${instance##*:}
+    if [[ \${VSZ} -lt ${RSS_LIMIT} && \${STAT} != *T* ]]; then
+        PIDTMP=\${instance%:*}
+        PID=\${PIDTMP##*:}
+        logger -p local3.info \"$ME killing \${PID} \${VSZ} \${STAT}\"
+        kill \${PID}
     fi
 done
 "
