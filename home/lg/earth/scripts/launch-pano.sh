@@ -42,4 +42,7 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     done
     echo "CLIENTS: \"$CLIENTS\"" >&2
     ${SCRIPDIR}/pano-launcher.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY $CLIENTS -h360 $XIV_OPTS -geometry ${XIV_FAKE_GEOMETRY} -fakewin $PANO_FILE &
+
+    # pause Earth in the background
+    lg-sudo --parallel killall -STOP googleearth-bin
 fi
