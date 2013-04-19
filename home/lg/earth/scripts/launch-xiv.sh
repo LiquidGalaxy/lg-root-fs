@@ -24,7 +24,7 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     [ `ls -x ${XIV_ROOT}/${COLLECTION}/*.ppm | wc -l` -lt 1 ] && { echo "$ME: Pano collection is empty: ${COLLECTION}" >&2; exit 1; }
     PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
 
-    ${SCRIPDIR}/pano-kill.sh
+    ${SCRIPDIR}/kill-xiv.sh
     CLIENTS=""
     for SLAVE in ${XIV_SLAVES[*]}; do
         HOSTSTUFF=${SLAVE%%@*}
