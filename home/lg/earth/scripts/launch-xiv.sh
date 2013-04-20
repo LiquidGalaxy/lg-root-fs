@@ -20,11 +20,12 @@ COLLECTION=${1:-default}
 ME=`basename $0`
 
 if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
+    ${SCRIPDIR}/kill-xiv.sh
+
     [ ! -d "${XIV_ROOT}/${COLLECTION}" ] && { echo "$ME: Pano collection not found: ${COLLECTION}" >&2; exit 1; }
     [ `ls -x ${XIV_ROOT}/${COLLECTION}/*.ppm | wc -l` -lt 1 ] && { echo "$ME: Pano collection is empty: ${COLLECTION}" >&2; exit 1; }
     PANO_FILE="-browse ${XIV_ROOT}/${COLLECTION}/*.ppm"
 
-    ${SCRIPDIR}/kill-xiv.sh
     CLIENTS=""
     for SLAVE in ${XIV_SLAVES[*]}; do
         HOSTSTUFF=${SLAVE%%@*}
