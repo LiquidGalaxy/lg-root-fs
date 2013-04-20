@@ -35,7 +35,7 @@ lg-ctl-master
 for lg in $LG_FRAMES ; do
     echo
     echo $lg:
-    ssh -x lg@$lg "$CMD" &
+    ssh -tt -x lg@$lg "$CMD" &
 done
 
 exit 0
