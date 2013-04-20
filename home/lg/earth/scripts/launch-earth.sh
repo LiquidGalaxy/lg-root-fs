@@ -17,11 +17,10 @@
 . ${SHINCLUDE}/lg-functions
 
 if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
-    ${SCRIPDIR}/pano-kill.sh
-    lg-sudo "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
+    ${SCRIPDIR}/kill-xiv.sh
+    lg-sudo --parallel --wait --timeout 1 "pkill '(run-earth-bin|googleearth-bin|mplayer)'"
     pkill -f viewsyncrelay.pl 
     pkill -u $(id -u) socat
-    sleep 1
 
     ### viewsyncrelay setup
     if [[ "${VSYNC_RELAY}" == "true" ]]; then
