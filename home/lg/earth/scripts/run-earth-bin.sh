@@ -83,7 +83,7 @@ while true ; do
     mv ${MYCFGDIR}/GECommonSettings.conf ${HOME}/.config/Google/
     mv ${MYCFGDIR}/GoogleEarthPlus.conf ${HOME}/.config/Google/
 
-    if [ "${LG_SV_FORCE_ENABLE}" -ne "*true*" ]; then
+    if [[ "${LG_SV_FORCE_ENABLE}" != "*true*" ]]; then
       LG_SV_FORCE_PATH="404"
     fi
 
