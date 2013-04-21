@@ -45,5 +45,5 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
     ${SCRIPDIR}/run-xiv.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY $CLIENTS -h360 $XIV_OPTS -geometry ${XIV_FAKE_GEOMETRY} -fakewin $PANO_FILE &
 
     # pause Earth in the background
-    lg-sudo --parallel "killall -STOP googleearth-bin"
+    lg-sudo --parallel --wait "killall -STOP googleearth-bin"
 fi
