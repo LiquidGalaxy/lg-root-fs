@@ -42,7 +42,7 @@ if [[ "${LG_MASTERSLAVE[0]:-slave}" == "master" ]]; then
         CLIENTS="${CLIENTS} -slavehost ${HOSTSTUFF}"
     done
     echo "CLIENTS: \"$CLIENTS\"" >&2
-    ${SCRIPDIR}/run-xiv.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY $CLIENTS -h360 $XIV_OPTS -geometry ${XIV_FAKE_GEOMETRY} -fakewin $PANO_FILE &
+    ssh $( cat /etc/hostname ) "${SCRIPDIR}/run-xiv.sh -spacenav -swapaxes -spsens $XIV_SENSITIVITY $CLIENTS -h360 $XIV_OPTS -geometry ${XIV_FAKE_GEOMETRY} -fakewin $PANO_FILE > /tmp/pano-master.log" &
 
     # pause Earth in the background
     lg-sudo --parallel --wait "killall -STOP googleearth-bin"
