@@ -98,5 +98,5 @@ WaterSurface=true
 3DImageryEnabled=true
 
 [Cache]
-DiskCacheSize=1024
+DiskCacheSize=256
 MemoryCacheSize=768
