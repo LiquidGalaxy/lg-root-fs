@@ -49,8 +49,10 @@ toolbarVis=false
 tooltips=false
 UID="gqU/0U68VKf79xjZwAChMQ=="
 UsageStats=false
+useHTTPSForGoogle=false
 UseThrownDrag=true
 VID="AAAACjcuMC4xLjgxNDQ="
+VisualizationEnabled=false
 wasFullScreen=false
 wasMaximized=false
 
@@ -79,6 +81,7 @@ DisableAdvancedFeatures=false
 ElevationExaggeration=1
 FeetMiles=false
 GridReference=1
+HighQualityTerrain=false
 IconSize=1
 MeasurementUnits=2
 OverviewSize=34
