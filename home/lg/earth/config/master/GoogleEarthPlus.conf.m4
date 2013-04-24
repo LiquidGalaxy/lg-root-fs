@@ -1,4 +1,5 @@
 [General]
+adsDisabled=true
 allowUnsafeBalloons=false
 AlwaysUseExternalBrowser=true
 buildingHighlight=false
@@ -38,6 +39,7 @@ shown_InternalBrowserWindowFrame=true
 shown_LeftPanel=false
 shown_RenderFrame=true
 shown_Ruler=false
+StoreCookies=false
 SwoopEnabled=true
 TimeAnimSpeed=100
 TimeLoopAnim=false
