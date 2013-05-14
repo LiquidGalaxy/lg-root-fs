@@ -113,7 +113,8 @@ ldap/
 legal
 libao.conf
 libnl-3/
-lightdm/
+lightdm/*.conf
+!lightdm/lightdm.conf
 lighttpd/conf-available/
 lirc/
 locale.alias
