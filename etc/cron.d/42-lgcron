@@ -1,3 +1,4 @@
+@reboot root /etc/init.d/mounthead.sh
 @reboot lg rm -f /home/lg/.ssh/ctl/*:*
 @reboot lg sleep 30; tmux new-session -d -s screensaver "/home/lg/bin/screensaver.py /home/lg/bin/tour.sh"
 @reboot lg sleep 33; 2>&1 /home/lg/bin/lg-evdev-udp /dev/input/spacenavigator >/dev/null &
