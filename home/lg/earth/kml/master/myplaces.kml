@@ -48,6 +48,15 @@
 				</Link>
 			</NetworkLink>
 		</Folder>
+		<Folder>
+			<name>Content</name>
+			<NetworkLink>
+				<name>Static KML</name>
+				<Link>
+					<href>##LG_STATIC_KML##</href>
+				</Link>
+			</NetworkLink>
+		</Folder>
 	</Folder>
 </Document>
 </kml>
