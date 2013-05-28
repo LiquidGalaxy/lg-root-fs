@@ -34,7 +34,7 @@
 					<refreshInterval>1</refreshInterval>
 				</Link>
 			</NetworkLink>
-		        <NetworkLink>
+			<NetworkLink>
 				<name>View Placemark</name>
 				<description>The view-based refresh allows the remote server to calculate
 			    the center of your screen and return a placemark.</description>
