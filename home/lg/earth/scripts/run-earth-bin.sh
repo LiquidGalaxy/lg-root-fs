@@ -22,16 +22,6 @@ ME="$( basename $0 )"
 ME_USER="$( id -un )"
 ME_USER_NUM="$( id -u )"
 
-# kill any other copies
-ME_PIDS="$( pgrep -u ${ME_USER_NUM} run-earth-bin )"
-for pid in ${ME_PIDS}; do
-    # do not kill thyself or thy children
-    if [ "$pid" -ne $$ ] && [ "$( ps -o ppid= $pid )" -ne $$ ]; then kill -9 $pid; fi
-done
-
-pkill -u ${ME_USER_NUM} googleearth-bin
-sleep 2
-
 # execute thyself as each Screen user
 if [[ "${ME_USER}" == "lg" && ${screen##/home/lgS} < ${LG_SCREEN_COUNT} ]]; then
     for screen in /home/lgS*; do
@@ -43,6 +33,16 @@ if [[ "${ME_USER}" == "lg" && ${screen##/home/lgS} < ${LG_SCREEN_COUNT} ]]; then
         fi
     done
 fi
+
+# kill any other copies
+ME_PIDS="$( pgrep -u ${ME_USER_NUM} run-earth-bin )"
+for pid in ${ME_PIDS}; do
+    # do not kill thyself or thy children
+    if [ "$pid" -ne $$ ] && [ "$( ps -o ppid= $pid )" -ne $$ ]; then kill -9 $pid; fi
+done
+
+pkill -u ${ME_USER_NUM} googleearth-bin
+sleep 2
 
 [[ -n "${DISPLAY}" ]] || export DISPLAY=:0.0
 SANITIZE_D=${DISPLAY//:/}

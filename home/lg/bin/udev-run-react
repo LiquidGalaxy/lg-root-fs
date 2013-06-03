@@ -9,7 +9,7 @@
 if [ "${UDEV_RELAUNCH}" == "true" ]; then
     if [ -n "$( pgrep X )" ]; then
         lg-log "relaunch kicked-off by udev activity"
-	lg-relaunch 2>>/tmp/$(basename ${0}).err >>/tmp/$(basename ${0}).log
+        lg-relaunch 2>>/tmp/$(basename ${0}).err >>/tmp/$(basename ${0}).log
     fi
 else
     lg-log "NOT configured to relaunch upon udev activity"
