@@ -71,8 +71,15 @@ while true ; do
     rm -f ${EARTH_QUERY:-/tmp/query.txt}
 
     # build the configuration files
+    NAVIGATOR="0"
+    if [[ "${EARTH_NAVIGATOR_SHOWN}" != "true" ]]; then
+      NAVIGATOR="2"
+    fi
     m4 -I${MYCFGDIR} ${MYCFGDIR}/GECommonSettings.conf.m4 > ${MYCFGDIR}/GECommonSettings.conf
-    m4 -D__HOMEDIR__=${HOME} ${MYCFGDIR}/GoogleEarthPlus.conf.m4 > ${MYCFGDIR}/GoogleEarthPlus.conf
+    m4 \
+      -D__HOMEDIR__=${HOME} \
+      -D__NAVIGATOR__=${NAVIGATOR} \
+      ${MYCFGDIR}/GoogleEarthPlus.conf.m4 > ${MYCFGDIR}/GoogleEarthPlus.conf
 
     # prep for move if needed
     mkdir -p -m 775 ${HOME}/.config/Google
