@@ -54,7 +54,7 @@ UsageStats=false
 useHTTPSForGoogle=false
 UseThrownDrag=true
 VID="AAAACjcuMC4xLjgxNDQ="
-VisualizationEnabled=true
+VisualizationEnabled=false
 wasFullScreen=false
 wasMaximized=false
 
